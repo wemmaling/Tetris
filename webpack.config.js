@@ -24,7 +24,7 @@ module.exports = {
         loader: "babel-loader",
         options: {
           plugins: ["transform-react-jsx", "transform-class-properties"],
-          presets: ["es2015"]
+          // presets: ["es2015"]
         }
       }
     ]
@@ -41,7 +41,7 @@ module.exports = {
 
     extensions: [".js", ".json", ".jsx", ".css"],
     // extensions that are used
-    },
+  },
 
   devServer: {
     contentBase: __dirname,

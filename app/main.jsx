@@ -1,9 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Map from 'Map'
-import Cell from 'Cell.jsx' // 怎么才能更简洁，去掉'./'和'.jsx'
+import { Provider } from 'react-redux'
+import store from 'store'
+import TetrisMap from './TetrisMap'
 
 ReactDOM.render(
-  <Map />,
+  <Provider store={store}>
+    <TetrisMap />
+  </Provider>,
   document.getElementById('container')
 )
