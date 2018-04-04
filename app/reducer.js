@@ -1,37 +1,23 @@
-import { List, Map } from 'immutable'
+import { Map, Repeat } from 'immutable'
 import * as A from 'action'
 
 const initialState = Map({
-  tetrisMap: List([
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-    List(["X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]),
-  ]),
+  // 当前存储的背景数据结构
+  tetrisMap: Repeat(Repeat("X", 10), 20),
+  // 正在下落的tetromino类型以及当前坐标
+  curTetromino: Map({ type: 'Z', x: 0, y: 0 }),
+  // curCoordinate: Map({ x: 0, y: 0 }),
 })
 
 export default function updateMap(state = initialState, action) {
   if (action.type === A.UPDATE_MAP) {
     const { newMap } = action
     return state.set('tetrisMap', newMap)
-    // todo 更新地图
-  } else {
+  } else if (action.type === A.UPDATE_TETROMINO) {
+    const { curTetromino } = action
+    return state.set('curTetromino', curTetromino)
+  }
+  else {
     return state
   }
 }

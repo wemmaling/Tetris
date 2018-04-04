@@ -1,23 +1,32 @@
-import { put, takeEvery, } from 'redux-saga/effects'
-import * as A from 'app/action'
-import { colorMap } from './resource'
+import { put, fork, takeEvery, select } from 'redux-saga/effects'
+import { delay } from 'redux-saga'
+import { Map } from 'immutable'
+import * as A from './action'
 
 export default function* rootSaga() {
-  //todo 添加saga
-  yield takeEvery(A.COMPUTE_MAP, updateMap)
-
+  yield takeEvery(A.MOVE_TETROMINO, moveTetromino)
+  yield fork(dropTetrominoLoop)
 }
 
-function* updateMap({ tetrisMap, row, col, colorName }) {
-  const { delta } = colorMap.get(colorName)
-  let newMap = tetrisMap
-  for (let i = 0; i < 4; i++) {
-    const dx = delta[i][0]
-    const dy = delta[i][1]
-    newMap = newMap.update(row + dx, value => value.update(col + dy, () => colorName))
+function* dropTetrominoLoop() {
+  while (true) {
+    yield delay(1000)
+    const state = yield select()
+
+    yield put({
+      type: A.MOVE_TETROMINO,
+      dx: 1,
+      dy: 0,
+    })
   }
+}
+
+function* moveTetromino({ dx, dy }) {
+  const state = yield select()
+  const curTetromino = state.get('curTetromino')
+  const { x, y, type } = curTetromino.toObject()
   yield put({
-    type: A.UPDATE_MAP,
-    newMap
+    type: A.UPDATE_TETROMINO,
+    curTetromino: Map({ type, x: x + dx, y: y + dy }),
   })
 }
