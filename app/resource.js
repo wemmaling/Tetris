@@ -1,6 +1,7 @@
 import { Map } from "immutable"
 
 export const colorMap = Map({
+  'W': {color: 'black', delta: []},
   'X': { color: 'white', delta: [] },
   'Z': { color: '#FF0000', delta: [[0, 0], [0, 1], [1, 1], [1, 2]] },
   'J': { color: '#0000FF', delta: [[0, 0], [1, 0], [1, 1], [1, 2]] },
