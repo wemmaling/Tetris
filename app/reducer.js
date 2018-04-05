@@ -16,8 +16,10 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.UPDATE_TETROMINO) {
     const { curTetromino } = action
     return state.set('curTetromino', curTetromino)
-  }
-  else {
+  } else if (action.type === A.RESET_TETROMINO) {
+    const { newTetromino } = action
+    return state.set('curTetromino', newTetromino)
+  } else {
     return state
   }
 }
