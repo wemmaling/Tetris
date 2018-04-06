@@ -37,34 +37,40 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver } = this.props
+    if(isGameOver) {
+      alert('Game Over!')
+    }
     const { color, delta } = colorMap.get(curTetromino.get('type'))
     const tRow = curTetromino.get('row')
     const tCol = curTetromino.get('col')
 
     return (
-      <svg width="100%"
-           height="1100px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
-        {tetrisMap.map((s, row) =>
-          <g key={row}>
-            {s.map((c, col) => {
-              const { x, y } = indexToCoordinate(row, col)
+      <div>
+        <svg width="100%"
+             height="1100px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+          {tetrisMap.map((s, row) =>
+            <g key={row}>
+              {s.map((c, col) => {
+                const { x, y } = indexToCoordinate(row, col)
+                return (
+                  <Cell key={col} x={x} y={y}
+                        fill={colorMap.get(tetrisMap.get(row).get(col)).color} />
+                )
+              })}
+            </g>
+          )}
+          <g>
+            {delta.map((every, index) => {
+              const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
               return (
-                <Cell key={col} x={x} y={y}
-                      fill={colorMap.get(tetrisMap.get(row).get(col)).color} />
+                <Cell key={index} x={x} y={y} fill={color} />
               )
             })}
           </g>
-        )}
-        <g>
-          {delta.map((every, index) => {
-            const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
-            return (
-              <Cell key={index} x={x} y={y} fill={color} />
-            )
-          })}
-        </g>
-      </svg>
+        </svg>
+        {score}
+      </div>
     )
   }
 }

@@ -5,8 +5,11 @@ const initialState = Map({
   // 当前存储的背景数据结构
   tetrisMap: Repeat(Repeat("X", 10).toList(), 20).toList(),
   // 正在下落的tetromino类型以及当前坐标
-  curTetromino: Map({ type: 'S', row: 0, col: 4 }),
-  // curCoordinate: Map({ x: 0, y: 0 }),
+  curTetromino: Map({ type: 'O', row: 0, col: 4 }),
+  // 计算得分，每下落一个物块得10分，一次性消1行100分，2行200，3行400，4行800
+  score: 0,
+  // 游戏是否结束
+  isGameOver: false,
 })
 
 export default function updateMap(state = initialState, action) {
@@ -19,7 +22,13 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.RESET_TETROMINO) {
     const { newTetromino } = action
     return state.set('curTetromino', newTetromino)
-  } else {
+  } else if (action.type === A.UPDATE_SCORE) {
+    const { getScore } = action
+    console.log(getScore)
+    return state.update('score', v => v + getScore)
+  } else if (action.type === A.GAME_OVER) {
+    return state.set('isGameOver', true)
+  }else {
     return state
   }
 }
