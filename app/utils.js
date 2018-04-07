@@ -1,5 +1,5 @@
 import { CELL_HEIGHT, CELL_WIDTH } from './constants.js'
-import { colorMap } from './resource'
+import { colorMap, directionMapDelta } from './resource'
 import { List } from "immutable"
 
 export function indexToCoordinate(row, col) {
@@ -8,9 +8,9 @@ export function indexToCoordinate(row, col) {
   return { x, y }
 }
 
-export function canMove(TerisMap, nextState) {
-  const { type, row, col } = nextState.toObject()
-  const { delta } = colorMap.get(type)
+export function canTetrominoMove(TerisMap, nextState) {
+  const { type, row, col, direction } = nextState.toObject()
+  const delta = directionMapDelta.get(type).get(direction)
   const colDeltaList = List(delta.map(every => every[1]))
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
@@ -19,11 +19,16 @@ export function canMove(TerisMap, nextState) {
   if (col + minCol < 0 || col + maxCol > 9 || row + maxRow > 19) {
     return false
   }
-  return !delta.some(([dRow, dCol]) => TerisMap.get(row + dRow).get(col + dCol) !== 'X')
+  return !delta.some(([dRow, dCol]) => row + dRow >= 0 && TerisMap.get(row + dRow).get(col + dCol) !== 'X'
+  )
 }
 
-// // todo 考虑物块从哪里开始掉
-// export function isGameOver(TerisMap, nextState) {
-//   return canMove(TerisMap, nextState)
-//   // return TerisMap.get(0).some(v => v !== 'X')
-// }
+export function dropRandom() {
+  const keysArray = colorMap.keySeq().toList().delete(0).toArray()
+  const index = Math.floor(Math.random() * 7)
+  return keysArray[index]
+}
+
+export function rorate(delta) {
+  return delta.map(([dRow, dCol]) => [dCol, -dRow])
+}

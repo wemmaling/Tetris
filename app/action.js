@@ -13,3 +13,5 @@ export const CLEAR_LINES = 'CLEAR_LINES'
 export const UPDATE_SCORE = 'UPDATE_SCORE'
 // 游戏结束
 export const GAME_OVER = 'GAME_OVER'
+// 旋转物块
+export const RORATE = 'RORATE'

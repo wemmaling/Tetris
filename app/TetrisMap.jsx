@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Cell from 'Cell'
 import { indexToCoordinate } from 'utils'
 import * as A from 'action'
-import { colorMap } from 'resource'
+import { colorMap, directionMapDelta } from 'resource'
 
 
 function mapStateToProps(state, ownProps) {
@@ -32,18 +32,18 @@ class TetrisMap extends React.Component {
       dCol = 0
     } else if (event.key === 'w') {
       // todo 旋转
+      this.props.dispatch({ type: A.RORATE })
     }
     this.props.dispatch({ type: A.MOVE_TETROMINO, dRow, dCol })
   }
 
   render() {
     const { tetrisMap, curTetromino, score, isGameOver } = this.props
-    if(isGameOver) {
-      alert('Game Over!')
+    if (isGameOver) {
+      console.log('Game Over!')
     }
-    const { color, delta } = colorMap.get(curTetromino.get('type'))
-    const tRow = curTetromino.get('row')
-    const tCol = curTetromino.get('col')
+    const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
+    const { color } = colorMap.get(type)
 
     return (
       <div>
@@ -61,7 +61,7 @@ class TetrisMap extends React.Component {
             </g>
           )}
           <g>
-            {delta.map((every, index) => {
+            {directionMapDelta.get(type).get(direction).map((every, index) => {
               const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
               return (
                 <Cell key={index} x={x} y={y} fill={color} />
