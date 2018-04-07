@@ -10,6 +10,12 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
+// todo 1、下落过程中按下键的卡顿问题
+// todo 2、判断游戏是否结束时好像还存在一些小bug
+// todo 3、物块的直接下落
+// todo 4、游戏的重新开始
+// todo 5、功能键的设置与设计
+
 class TetrisMap extends React.Component {
   componentDidMount() {
     document.addEventListener('keypress', this.onKeyPress)
