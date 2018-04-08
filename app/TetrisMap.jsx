@@ -10,7 +10,7 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 1、下落过程中按下键的卡顿问题
+// todo 1、解决旋转加速问题
 // todo 2、判断游戏是否结束时好像还存在一些小bug
 // todo 3、物块的直接下落
 // todo 4、游戏的重新开始
@@ -18,29 +18,42 @@ function mapStateToProps(state, ownProps) {
 
 class TetrisMap extends React.Component {
   componentDidMount() {
-    document.addEventListener('keypress', this.onKeyPress)
+    document.addEventListener('keydown', this.onKeyDown)
+    document.addEventListener('keyup', this.onKeyUp)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keypress', this.onKeyPress)
+    document.removeEventListener('keydown', this.onKeyDown)
   }
 
-  onKeyPress = (event) => {
+  onKeyUp = (event) => {
+    if (event.key === 'a' || event.key === 'd') {
+      this.props.dispatch({ type: A.LR_KEY_UP, keyName: event.key })
+    } else if (event.key === 's') {
+      this.props.dispatch({ type: A.DROP_KEY_UP, keyName: event.key })
+    }
+  }
+
+  onKeyDown = (event) => {
     let dRow = 0, dCol = 0
     if (event.key === 'a') {
+      // this.props.dispatch(type:)
       dRow = 0
       dCol = -1
+      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow, dCol })
     } else if (event.key === 'd') {
       dRow = 0
       dCol = 1
+      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow, dCol })
     } else if (event.key === 's') {
       dRow = 1
       dCol = 0
+      this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow, dCol })
     } else if (event.key === 'w') {
-      // todo 旋转
       this.props.dispatch({ type: A.RORATE })
     }
-    this.props.dispatch({ type: A.MOVE_TETROMINO, dRow, dCol })
+
+    // this.props.dispatch({ type: A.MOVE_TETROMINO, dRow, dCol })
   }
 
   render() {

@@ -1,4 +1,4 @@
-import { put, fork, takeEvery, select } from 'redux-saga/effects'
+import { cancel, join, put, fork, takeEvery, select, race, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 import { Map, Repeat } from 'immutable'
 import * as A from './action'
@@ -12,14 +12,65 @@ export default function* rootSaga() {
   yield takeEvery(A.CLEAR_LINES, clearLines)
   yield takeEvery(A.RORATE, rorateTetromino)
   yield fork(dropTetrominoLoop)
+  yield fork(dropKeyUpAndDown)
+  yield fork(lrKeyUpAndDown)
+}
+
+function* quickMoveLeftOrRight(dRow, dCol) {
+  const state = yield select()
+  const { isGameOver } = state.toObject()
+  while (!isGameOver) {
+    yield put({ type: A.MOVE_TETROMINO, dRow, dCol })
+    yield delay(150)
+  }
+}
+
+// 监听按键的按下与释放
+function* dropKeyUpAndDown() {
+  const state = yield select()
+  const { speed, isGameOver } = state.toObject()
+  while (!isGameOver) {
+    yield take(A.DROP_KEY_DOWN)
+    yield put({
+      type: A.CHANGE_SPEED,
+      speed: 20 * speed,
+    })
+    const task = yield fork(dropTetrominoLoop)
+    yield take(A.DROP_KEY_UP)
+    yield cancel(task)
+    yield put({
+      type: A.CHANGE_SPEED,
+      speed: speed,
+    })
+  }
+}
+
+function* lrKeyUpAndDown() {
+  const state = yield select()
+  const { speed, isGameOver } = state.toObject()
+  while (!isGameOver) {
+    const action = yield take(A.LR_KEY_DOWN)
+    const { dRow, dCol } = action
+    // yield put({
+    //   type: A.CHANGE_SPEED,
+    //   speed: 10 * speed,
+    // })
+    const task = yield fork(quickMoveLeftOrRight, dRow, dCol)
+    yield take(A.LR_KEY_UP)
+    yield cancel(task)
+    // yield put({
+    //   type: A.CHANGE_SPEED,
+    //   speed: speed,
+    // })
+  }
 }
 
 // tetromino的自动下落
 function* dropTetrominoLoop() {
   const state = yield select()
-  const { isGameOver } = state.toObject()
+  const { isGameOver, speed } = state.toObject()
   while (!isGameOver) {
-    yield delay(1000)
+    yield delay(1000 / speed)
     yield put({
       type: A.MOVE_TETROMINO,
       dRow: 1,
@@ -108,7 +159,7 @@ function* clearLines() {
 // 通过键盘控制tetromino的移动
 function* moveTetromino({ dRow, dCol }) {
   const state = yield select()
-  const { tetrisMap, curTetromino, isGameOver } = state.toObject()
+  const { tetrisMap, curTetromino, isGameOver, speed } = state.toObject()
   const { row, col } = curTetromino.toObject()
   const nextPosition = curTetromino.update('row', v => v + dRow).update('col', v => v + dCol)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
