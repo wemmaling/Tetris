@@ -11,6 +11,7 @@ export default function* rootSaga() {
   yield takeEvery(A.DROP_NEW_TETROMINO, dropNewTetromino)
   yield takeEvery(A.CLEAR_LINES, clearLines)
   yield takeEvery(A.RORATE, rorateTetromino)
+  yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield fork(dropTetrominoLoop)
   yield fork(dropKeyUpAndDown)
   yield fork(lrKeyUpAndDown)
@@ -46,6 +47,7 @@ function* dropKeyUpAndDown() {
 }
 
 function* lrKeyUpAndDown() {
+  console.log('lr-key-and-down')
   const state = yield select()
   const { speed, isGameOver } = state.toObject()
   while (!isGameOver) {
@@ -77,6 +79,23 @@ function* dropTetrominoLoop() {
       dCol: 0,
     })
   }
+}
+
+// 控制物块的直接下落
+function* dropDirectly() {
+  const state = yield select()
+  const { tetrisMap, curTetromino } = state.toObject()
+  let nextPosition = curTetromino
+  while (canTetrominoMove(tetrisMap, nextPosition)) {
+    nextPosition = nextPosition.update('row', v => v + 1)
+  }
+  yield put({
+    type: A.UPDATE_TETROMINO,
+    curTetromino: nextPosition.update('row', v => v - 1)
+  })
+  yield put({ type: A.MERGE_MAP })
+  console.log(nextPosition.toJS())
+
 }
 
 // 掉落新的tetromino
@@ -159,7 +178,7 @@ function* clearLines() {
 // 通过键盘控制tetromino的移动
 function* moveTetromino({ dRow, dCol }) {
   const state = yield select()
-  const { tetrisMap, curTetromino, isGameOver, speed } = state.toObject()
+  const { tetrisMap, curTetromino } = state.toObject()
   const { row, col } = curTetromino.toObject()
   const nextPosition = curTetromino.update('row', v => v + dRow).update('col', v => v + dCol)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
@@ -184,11 +203,12 @@ function* moveTetromino({ dRow, dCol }) {
 
 // 旋转
 function* rorateTetromino() {
+  console.log('rorateTetromino')
   const state = yield select()
   const { tetrisMap, curTetromino } = state.toObject()
   const nextPosition = curTetromino.update('direction', v => (v + 1) % 4)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
-  if (canMove) {
+  if (canMove && curTetromino.get('type') !== 'O') {
     yield put({
       type: A.UPDATE_TETROMINO,
       curTetromino: nextPosition,

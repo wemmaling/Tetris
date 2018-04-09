@@ -15,11 +15,12 @@ export const UPDATE_SCORE = 'UPDATE_SCORE'
 export const GAME_OVER = 'GAME_OVER'
 // 旋转物块
 export const RORATE = 'RORATE'
-
+// 改变下落速度
 export const CHANGE_SPEED = 'CHANGE_SPEED'
-
+// 长按按键
 export const LR_KEY_UP = 'LR_KEY_UP'
 export const LR_KEY_DOWN = 'LR_KEY_DOWN'
-
 export const DROP_KEY_UP = 'DROP_KEY_UP'
 export const DROP_KEY_DOWN = 'DROP_KEY_DOWN'
+// 直接落下
+export const DROP_DIRECTLY = 'DROP_DIRECTLY'

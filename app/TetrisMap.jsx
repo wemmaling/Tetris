@@ -10,13 +10,16 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 1、解决旋转加速问题
+// todo 6、下一物块掉落预览
 // todo 2、判断游戏是否结束时好像还存在一些小bug
-// todo 3、物块的直接下落
-// todo 4、游戏的重新开始
+// todo 4、游戏的重新开始与暂停
 // todo 5、功能键的设置与设计
 
 class TetrisMap extends React.Component {
+  // 为了长按旋转键时不连续触发旋转事件的变量
+  rorateKeyDown = false
+  dropDirectly = false
+
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown)
     document.addEventListener('keyup', this.onKeyUp)
@@ -24,6 +27,7 @@ class TetrisMap extends React.Component {
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown)
+    document.removeEventListener('keyup', this.onKeyUp)
   }
 
   onKeyUp = (event) => {
@@ -31,29 +35,29 @@ class TetrisMap extends React.Component {
       this.props.dispatch({ type: A.LR_KEY_UP, keyName: event.key })
     } else if (event.key === 's') {
       this.props.dispatch({ type: A.DROP_KEY_UP, keyName: event.key })
+    } else if (event.key === 'w') {
+      this.rorateKeyDown = false
+    } else if (event.keyCode === 32) {
+      this.dropDirectly = false
     }
   }
 
-  onKeyDown = (event) => {
-    let dRow = 0, dCol = 0
-    if (event.key === 'a') {
-      // this.props.dispatch(type:)
-      dRow = 0
-      dCol = -1
-      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow, dCol })
-    } else if (event.key === 'd') {
-      dRow = 0
-      dCol = 1
-      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow, dCol })
-    } else if (event.key === 's') {
-      dRow = 1
-      dCol = 0
-      this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow, dCol })
-    } else if (event.key === 'w') {
-      this.props.dispatch({ type: A.RORATE })
-    }
 
-    // this.props.dispatch({ type: A.MOVE_TETROMINO, dRow, dCol })
+  onKeyDown = (event) => {
+    if (event.key === 'a') {
+      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
+    } else if (event.key === 'd') {
+      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
+    } else if (event.key === 's') {
+      this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
+    } else if (event.key === 'w' && !this.rorateKeyDown) {
+      this.props.dispatch({ type: A.RORATE })
+      this.rorateKeyDown = true
+    } else if (event.keyCode === 32 && !this.dropDirectly) {
+      console.log('space')
+      this.props.dispatch({ type: A.DROP_DIRECTLY })
+      this.dropDirectly = true
+    }
   }
 
   render() {
