@@ -69,9 +69,9 @@ class TetrisMap extends React.Component {
     const { color } = colorMap.get(type)
 
     return (
-      <div>
-        <svg width="100%"
-             height="1100px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+      <div style={{display: 'flex'}}>
+        <svg width="500px"
+             height="810px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
           {tetrisMap.map((s, row) =>
             <g key={row}>
               {s.map((c, col) => {
@@ -92,7 +92,7 @@ class TetrisMap extends React.Component {
             })}
           </g>
         </svg>
-        {score}
+        <h2>Score：{score}</h2>
       </div>
     )
   }

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "author": "wemmaling",
   "scripts": {
-    "start": "webpack-dev-server --mode=development"
+    "start": "webpack-dev-server --mode=development",
+    "build": "webpack"
   },
   "dependencies": {
     "immutable": "^3.8.2",

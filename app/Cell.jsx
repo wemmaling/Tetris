@@ -1,4 +1,5 @@
 import React from 'react'
+import {CELL_HEIGHT, CELL_WIDTH} from './constants'
 
 export default class Cell extends React.Component {
   render() {
@@ -7,8 +8,8 @@ export default class Cell extends React.Component {
         <rect
           x={x}
           y={y}
-          width="50"
-          height="50"
+          width={CELL_WIDTH}
+          height={CELL_HEIGHT}
           fill={fill}
           stroke="#000000"
         />

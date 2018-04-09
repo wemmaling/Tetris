@@ -203,7 +203,6 @@ function* moveTetromino({ dRow, dCol }) {
 
 // 旋转
 function* rorateTetromino() {
-  console.log('rorateTetromino')
   const state = yield select()
   const { tetrisMap, curTetromino } = state.toObject()
   const nextPosition = curTetromino.update('direction', v => (v + 1) % 4)
