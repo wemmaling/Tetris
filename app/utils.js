@@ -23,10 +23,12 @@ export function canTetrominoMove(TerisMap, nextState) {
   )
 }
 
+const keysArray = colorMap.keySeq().toList().delete(0).toArray()
+
 export function dropRandom() {
-  const keysArray = colorMap.keySeq().toList().delete(0).toArray()
   const index = Math.floor(Math.random() * 7)
-  return keysArray[index]
+  const direction = Math.floor(Math.random() * 4)
+  return { type: keysArray[index], direction }
 }
 
 export function rorate(delta) {

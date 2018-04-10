@@ -7,6 +7,7 @@ export const UPDATE_TETROMINO = 'UPDATE_TETROMINO'
 // 合并背景后重新掉落新的Tetromino
 export const DROP_NEW_TETROMINO = 'DROP_NEW_TETROMINO'
 export const RESET_TETROMINO = 'RESET_TETROMINO'
+export const UPDATE_NEXT_TETROMINO = 'UPDATE_NEXT_TETROMINO'
 // 消除
 export const CLEAR_LINES = 'CLEAR_LINES'
 // 更新分数

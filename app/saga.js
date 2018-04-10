@@ -47,9 +47,8 @@ function* dropKeyUpAndDown() {
 }
 
 function* lrKeyUpAndDown() {
-  console.log('lr-key-and-down')
   const state = yield select()
-  const { speed, isGameOver } = state.toObject()
+  const { isGameOver } = state.toObject()
   while (!isGameOver) {
     const action = yield take(A.LR_KEY_DOWN)
     const { dRow, dCol } = action
@@ -69,10 +68,13 @@ function* lrKeyUpAndDown() {
 
 // tetromino的自动下落
 function* dropTetrominoLoop() {
-  const state = yield select()
-  const { isGameOver, speed } = state.toObject()
-  while (!isGameOver) {
-    yield delay(1000 / speed)
+  while (true) {
+    console.log('drop-loop')
+    const state = yield select()
+    if (state.get('isGameOver')) {
+      break
+    }
+    yield delay(1000 / state.get('speed'))
     yield put({
       type: A.MOVE_TETROMINO,
       dRow: 1,
@@ -94,27 +96,25 @@ function* dropDirectly() {
     curTetromino: nextPosition.update('row', v => v - 1)
   })
   yield put({ type: A.MERGE_MAP })
-  console.log(nextPosition.toJS())
 
 }
 
 // 掉落新的tetromino
 function* dropNewTetromino() {
+  console.log('drop-new-tetromino')
   const state = yield select()
-  const { isGameOver } = state.toObject()
+  const { isGameOver, nextTetromino } = state.toObject()
   if (!isGameOver) {
-    const nextType = dropRandom()
-    // console.log(nextType)
-    const newTetromino = Map({
-      type: nextType,
-      row: 0,
-      col: 4,
-      direction: Math.floor(Math.random() * 4),
-    })
     yield put({
       type: A.RESET_TETROMINO,
-      newTetromino,
+      nextTetromino,
     })
+    const { type: nextType, direction: nextDir } = dropRandom()
+    yield put({
+      type: A.UPDATE_NEXT_TETROMINO,
+      next: nextTetromino.set('type', nextType).set('direction', nextDir),
+    })
+
   }
 
   // todo 掉落暂不计分
@@ -184,7 +184,7 @@ function* moveTetromino({ dRow, dCol }) {
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   // 如果物块刚出来就发现不能继续移动，Game Over!
   if (!canMove && row === 0 && dRow === 1) {
-    debugger
+    // debugger
     yield put({ type: A.GAME_OVER })
   } else {
     // 如果物块不能继续移动且游戏并没有结束，并且动作为向下移动，就合并背景

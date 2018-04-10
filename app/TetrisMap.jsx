@@ -10,7 +10,6 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 6、下一物块掉落预览
 // todo 2、判断游戏是否结束时好像还存在一些小bug
 // todo 4、游戏的重新开始与暂停
 // todo 5、功能键的设置与设计
@@ -54,22 +53,23 @@ class TetrisMap extends React.Component {
       this.props.dispatch({ type: A.RORATE })
       this.rorateKeyDown = true
     } else if (event.keyCode === 32 && !this.dropDirectly) {
-      console.log('space')
       this.props.dispatch({ type: A.DROP_DIRECTLY })
       this.dropDirectly = true
     }
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino } = this.props
     if (isGameOver) {
       console.log('Game Over!')
     }
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
+    const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
+    const { color: nextColor } = colorMap.get(nextType)
 
     return (
-      <div style={{display: 'flex'}}>
+      <div style={{ display: 'flex' }}>
         <svg width="500px"
              height="810px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
           {tetrisMap.map((s, row) =>
@@ -92,7 +92,21 @@ class TetrisMap extends React.Component {
             })}
           </g>
         </svg>
-        <h2>Score：{score}</h2>
+        <div>
+          <h2>Score：{score}</h2>
+          <svg width="500px"
+               height="500px">
+            <g>
+              {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
+                const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
+                return (
+                  <Cell key={index} x={x} y={y} fill={nextColor} />
+                )
+              })}
+            </g>
+          </svg>
+          {isGameOver ? <h1>Game Over!</h1> : null}
+        </div>
       </div>
     )
   }
