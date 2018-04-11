@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import GameOverPage from 'GameOverPage'
 import Cell from 'Cell'
 import { indexToCoordinate } from 'utils'
 import * as A from 'action'
@@ -10,7 +11,7 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 2、判断游戏是否结束时好像还存在一些小bug
+// todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 4、游戏的重新开始与暂停
 // todo 5、功能键的设置与设计
 
@@ -41,7 +42,6 @@ class TetrisMap extends React.Component {
     }
   }
 
-
   onKeyDown = (event) => {
     if (event.key === 'a') {
       this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
@@ -60,9 +60,6 @@ class TetrisMap extends React.Component {
 
   render() {
     const { tetrisMap, curTetromino, score, isGameOver, nextTetromino } = this.props
-    if (isGameOver) {
-      console.log('Game Over!')
-    }
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
@@ -70,15 +67,17 @@ class TetrisMap extends React.Component {
 
     return (
       <div style={{ display: 'flex' }}>
+        {/*todo 长宽调整*/}
         <svg width="500px"
              height="810px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
           {tetrisMap.map((s, row) =>
             <g key={row}>
               {s.map((c, col) => {
                 const { x, y } = indexToCoordinate(row, col)
+                const t = tetrisMap.get(row).get(col)
                 return (
                   <Cell key={col} x={x} y={y}
-                        fill={colorMap.get(tetrisMap.get(row).get(col)).color} />
+                        fill={t === 'B' ? 'pink' : colorMap.get(t).color} />
                 )
               })}
             </g>
@@ -105,7 +104,7 @@ class TetrisMap extends React.Component {
               })}
             </g>
           </svg>
-          {isGameOver ? <h1>Game Over!</h1> : null}
+          {isGameOver ? <GameOverPage /> : null}
         </div>
       </div>
     )

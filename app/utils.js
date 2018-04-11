@@ -1,6 +1,6 @@
-import { CELL_HEIGHT, CELL_WIDTH } from './constants.js'
+import { List, Map } from "immutable"
+import { CELL_HEIGHT, CELL_WIDTH, HEIGHT, WIDTH } from './constants.js'
 import { colorMap, directionMapDelta } from './resource'
-import { List } from "immutable"
 
 export function indexToCoordinate(row, col) {
   const x = CELL_WIDTH * col
@@ -16,19 +16,24 @@ export function canTetrominoMove(TerisMap, nextState) {
   const maxRow = rowDeltaList.max()
   const minCol = colDeltaList.min()
   const maxCol = colDeltaList.max()
-  if (col + minCol < 0 || col + maxCol > 9 || row + maxRow > 19) {
+  if (col + minCol < 0 || col + maxCol > WIDTH - 1 || row + maxRow > HEIGHT - 1) {
+    console.log('到边界了，无法移动')
     return false
   }
-  return !delta.some(([dRow, dCol]) => row + dRow >= 0 && TerisMap.get(row + dRow).get(col + dCol) !== 'X'
-  )
+  return !delta.some(([dRow, dCol]) => row + dRow >= 0 && TerisMap.get(row + dRow).get(col + dCol) !== 'X')
 }
 
 const keysArray = colorMap.keySeq().toList().delete(0).toArray()
 
 export function dropRandom() {
   const index = Math.floor(Math.random() * 7)
+  const type = keysArray[index]
   const direction = Math.floor(Math.random() * 4)
-  return { type: keysArray[index], direction }
+  const delta = directionMapDelta.get(type).get(direction)
+  const rowDeltaList = List(delta.map(every => every[0]))
+  const maxRow = rowDeltaList.max()
+
+  return Map({ type, row: -maxRow, col: 4, direction })
 }
 
 export function rorate(delta) {

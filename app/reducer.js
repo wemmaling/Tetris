@@ -6,18 +6,8 @@ const initialState = Map({
   // 当前存储的背景数据结构
   tetrisMap: Repeat(Repeat("X", 10).toList(), 20).toList(),
   // 正在下落的tetromino类型以及当前坐标
-  curTetromino: Map({
-    type: dropRandom().type,
-    row: 0,
-    col: 4,
-    direction: dropRandom().direction
-  }),
-  nextTetromino: Map({
-    type: dropRandom().type,
-    row: 0,
-    col: 4,
-    direction: dropRandom().direction
-  }),
+  curTetromino: dropRandom(),
+  nextTetromino: dropRandom(),
   // 计算得分，每下落一个物块得10分，一次性消1行100分，2行200，3行400，4行800
   score: 0,
   // 下落速度
@@ -45,6 +35,8 @@ export default function updateMap(state = initialState, action) {
     return state.set('speed', action.speed)
   } else if (action.type === A.UPDATE_NEXT_TETROMINO) {
     return state.set('nextTetromino', action.next)
+  } else if (action.type === A.RESTART) {
+    return initialState
   } else {
     return state
   }
