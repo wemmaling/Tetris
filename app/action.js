@@ -25,3 +25,5 @@ export const DROP_KEY_UP = 'DROP_KEY_UP'
 export const DROP_KEY_DOWN = 'DROP_KEY_DOWN'
 // 直接落下
 export const DROP_DIRECTLY = 'DROP_DIRECTLY'
+// 重启游戏
+export const RESTART = 'RESTART'

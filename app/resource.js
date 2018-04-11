@@ -25,7 +25,7 @@ for (let index = 0; index < 3; index += 1) {
   zDelta = zDelta.insert(zDelta.size, rorate(zDelta.get(zDelta.size - 1)))
   jDelta = jDelta.insert(jDelta.size, rorate(jDelta.get(jDelta.size - 1)))
   sDelta = sDelta.insert(sDelta.size, rorate(sDelta.get(sDelta.size - 1)))
-  oDelta = oDelta.insert(oDelta.size, rorate(oDelta.get(oDelta.size - 1)))
+  oDelta = oDelta.insert(oDelta.size, oDelta.get(oDelta.size - 1))
   lDelta = lDelta.insert(lDelta.size, rorate(lDelta.get(lDelta.size - 1)))
   tDelta = tDelta.insert(tDelta.size, rorate(tDelta.get(tDelta.size - 1)))
   iDelta = iDelta.insert(iDelta.size, rorate(iDelta.get(iDelta.size - 1)))
