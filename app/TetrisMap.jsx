@@ -21,6 +21,7 @@ class TetrisMap extends React.Component {
   dropDirectly = false
 
   componentDidMount() {
+    this.props.dispatch({type: A.START})
     document.addEventListener('keydown', this.onKeyDown)
     document.addEventListener('keyup', this.onKeyUp)
   }

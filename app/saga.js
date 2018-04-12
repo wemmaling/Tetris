@@ -20,9 +20,21 @@ export default function* rootSaga() {
   yield takeEvery(A.CLEAR_LINES, clearLines)
   yield takeEvery(A.RORATE, rorateTetromino)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
-  yield fork(dropTetrominoLoop)
-  yield fork(dropKeyUpAndDown)
-  yield fork(lrKeyUpAndDown)
+  yield takeEvery(A.RESTART, restart)
+  yield fork(watchGameStatus)
+}
+
+function* watchGameStatus() {
+  while (true) {
+    yield take(A.START)
+    const dropTask = yield fork(dropTetrominoLoop)
+    const dropListenTask = yield fork(dropKeyUpAndDown)
+    const lrListenTask = yield fork(lrKeyUpAndDown)
+    yield take(A.GAME_OVER)
+    yield cancel(dropTask)
+    yield cancel(dropListenTask)
+    yield cancel(lrListenTask)
+  }
 }
 
 
@@ -240,4 +252,8 @@ function* rorateTetromino() {
       curTetromino: nextPosition,
     })
   }
+}
+
+function* restart() {
+  yield put({ type: A.START })
 }
