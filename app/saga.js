@@ -21,8 +21,10 @@ export default function* rootSaga() {
   yield takeEvery(A.RORATE, rorateTetromino)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield takeEvery(A.RESTART, restart)
+  yield takeEvery(A.GAME_OVER, gameOver)
   yield fork(watchGameStatus)
 }
+
 
 function* watchGameStatus() {
   while (true) {
@@ -30,13 +32,12 @@ function* watchGameStatus() {
     const dropTask = yield fork(dropTetrominoLoop)
     const dropListenTask = yield fork(dropKeyUpAndDown)
     const lrListenTask = yield fork(lrKeyUpAndDown)
-    yield take(A.GAME_OVER)
+    yield take(A.PAUSE)
     yield cancel(dropTask)
     yield cancel(dropListenTask)
     yield cancel(lrListenTask)
   }
 }
-
 
 // 监听下键的按下与释放
 function* dropKeyUpAndDown() {
@@ -256,4 +257,9 @@ function* rorateTetromino() {
 
 function* restart() {
   yield put({ type: A.START })
+}
+
+function* gameOver() {
+  yield put({type: A.UPDATE_GAME_STATUS})
+  yield put({type: A.PAUSE})
 }

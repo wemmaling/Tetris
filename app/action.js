@@ -29,3 +29,5 @@ export const DROP_DIRECTLY = 'DROP_DIRECTLY'
 export const RESTART = 'RESTART'
 // 游戏开始
 export const START = 'START'
+export const PAUSE = 'PAUSE'
+export const UPDATE_GAME_STATUS = 'UPDATE_GAME_STATUS'

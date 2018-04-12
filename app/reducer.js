@@ -29,7 +29,7 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.UPDATE_SCORE) {
     const { getScore } = action
     return state.update('score', v => v + getScore)
-  } else if (action.type === A.GAME_OVER) {
+  } else if (action.type === A.UPDATE_GAME_STATUS) {
     return state.set('isGameOver', true)
   } else if (action.type === A.CHANGE_SPEED) {
     return state.set('speed', action.speed)

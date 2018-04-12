@@ -21,7 +21,7 @@ class TetrisMap extends React.Component {
   dropDirectly = false
 
   componentDidMount() {
-    this.props.dispatch({type: A.START})
+    this.props.dispatch({ type: A.START })
     document.addEventListener('keydown', this.onKeyDown)
     document.addEventListener('keyup', this.onKeyUp)
   }
@@ -105,6 +105,12 @@ class TetrisMap extends React.Component {
               })}
             </g>
           </svg>
+          <div>
+            <button onClick={() => this.props.dispatch({ type: A.PAUSE })}>暂停</button>
+            <button style={{ marginLeft: '20px' }}
+                    onClick={() => this.props.dispatch({ type: A.START })}>继续
+            </button>
+          </div>
           {isGameOver ? <GameOverPage /> : null}
         </div>
       </div>
