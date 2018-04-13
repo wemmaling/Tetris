@@ -1,5 +1,5 @@
 import { List, Map } from "immutable"
-import { CELL_HEIGHT, CELL_WIDTH, HEIGHT, WIDTH } from './constants.js'
+import { CELL_HEIGHT, CELL_WIDTH, ROW, COL } from './constants.js'
 import { colorMap, directionMapDelta } from './resource'
 
 export function indexToCoordinate(row, col) {
@@ -16,7 +16,7 @@ export function canTetrominoMove(TerisMap, nextState) {
   const maxRow = rowDeltaList.max()
   const minCol = colDeltaList.min()
   const maxCol = colDeltaList.max()
-  if (col + minCol < 0 || col + maxCol > WIDTH - 1 || row + maxRow > HEIGHT - 1) {
+  if (col + minCol < 0 || col + maxCol > COL - 1 || row + maxRow > ROW - 1) {
     console.log('到边界了，无法移动')
     return false
   }

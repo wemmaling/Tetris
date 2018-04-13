@@ -11,7 +11,7 @@ import { Map, Repeat } from 'immutable'
 import * as A from './action'
 import { scoreRule, directionMapDelta } from './resource'
 import { canTetrominoMove, dropRandom } from './utils'
-import { WIDTH } from './constants'
+import { COL } from './constants'
 
 export default function* rootSaga() {
   yield takeEvery(A.MOVE_TETROMINO, moveTetromino)
@@ -146,17 +146,15 @@ function* dropDirectly() {
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   if (!isGameOver) {
-    let dRow = -1
     let nextPosition = curTetromino
     while (canTetrominoMove(tetrisMap, nextPosition)) {
-      dRow += 1
       nextPosition = nextPosition.update('row', v => v + 1)
     }
     yield put({
-      type: A.MOVE_TETROMINO,
-      dRow,
-      dCol: 0,
+      type: A.UPDATE_TETROMINO,
+      curTetromino: nextPosition.update('row', v => v - 1)
     })
+    yield put({ type: A.MERGE_MAP })
   }
 }
 
@@ -186,6 +184,7 @@ function* mergeMap() {
       type: A.UPDATE_MAP,
       newMap,
     })
+    // yield delay(1000)
     yield put({
       type: A.CLEAR_LINES,
     })
@@ -194,18 +193,18 @@ function* mergeMap() {
 
 // 与背景板融合后判断是否有行满足消除的要求并更新Map
 function* clearLines() {
-  console.log('clear-lines')
   const state = yield select()
   const { tetrisMap } = state.toObject()
   let result = 0
   let newMap = tetrisMap
   tetrisMap.map((s, row) => {
     if (!s.includes('X')) {
-      newMap = newMap.delete(row).insert(0, Repeat('X', WIDTH).toList())
+      newMap = newMap.delete(row).insert(0, Repeat('X', COL).toList())
       result += 1
     }
   })
   if (result !== 0) {
+    console.log('clear-lines')
     yield put({
       type: A.UPDATE_MAP,
       newMap
@@ -260,6 +259,6 @@ function* restart() {
 }
 
 function* gameOver() {
-  yield put({type: A.UPDATE_GAME_STATUS})
-  yield put({type: A.PAUSE})
+  yield put({ type: A.UPDATE_GAME_STATUS })
+  yield put({ type: A.PAUSE })
 }

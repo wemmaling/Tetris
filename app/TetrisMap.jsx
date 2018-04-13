@@ -5,6 +5,7 @@ import Cell from 'Cell'
 import { indexToCoordinate } from 'utils'
 import * as A from 'action'
 import { colorMap, directionMapDelta } from 'resource'
+import { CELL_WIDTH, CELL_HEIGHT, COL, ROW } from './constants'
 
 
 function mapStateToProps(state, ownProps) {
@@ -12,7 +13,6 @@ function mapStateToProps(state, ownProps) {
 }
 
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
-// todo 4、游戏的重新开始与暂停
 // todo 5、功能键的设置与设计
 
 class TetrisMap extends React.Component {
@@ -32,11 +32,12 @@ class TetrisMap extends React.Component {
   }
 
   onKeyUp = (event) => {
-    if (event.key === 'a' || event.key === 'd') {
-      this.props.dispatch({ type: A.LR_KEY_UP, keyName: event.key })
-    } else if (event.key === 's') {
-      this.props.dispatch({ type: A.DROP_KEY_UP, keyName: event.key })
-    } else if (event.key === 'w') {
+    const key = event.key.toLowerCase()
+    if (key === 'a' || key === 'd') {
+      this.props.dispatch({ type: A.LR_KEY_UP, keyName: key })
+    } else if (key === 's') {
+      this.props.dispatch({ type: A.DROP_KEY_UP, keyName: key })
+    } else if (key === 'w') {
       this.rorateKeyDown = false
     } else if (event.keyCode === 32) {
       this.dropDirectly = false
@@ -44,13 +45,14 @@ class TetrisMap extends React.Component {
   }
 
   onKeyDown = (event) => {
-    if (event.key === 'a') {
+    const key = event.key.toLowerCase()
+    if (key === 'a') {
       this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
-    } else if (event.key === 'd') {
+    } else if (key === 'd') {
       this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
-    } else if (event.key === 's') {
+    } else if (key === 's') {
       this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
-    } else if (event.key === 'w' && !this.rorateKeyDown) {
+    } else if (key === 'w' && !this.rorateKeyDown) {
       this.props.dispatch({ type: A.RORATE })
       this.rorateKeyDown = true
     } else if (event.keyCode === 32 && !this.dropDirectly) {
@@ -65,12 +67,17 @@ class TetrisMap extends React.Component {
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
     const { color: nextColor } = colorMap.get(nextType)
+    const pauseButton = <button onClick={() => this.props.dispatch({ type: A.PAUSE })}>暂停</button>
+    const startButton = <button style={{ marginLeft: '20px' }}
+                                onClick={() => this.props.dispatch({ type: A.START })}>继续</button>
 
     return (
-      <div style={{ display: 'flex' }}>
+      <div
+        style={{ display: 'flex', filter: isGameOver ? 'blur(3px)' : 'none', overflow: 'hidden' }}>
         {/*todo 长宽调整*/}
-        <svg width="500px"
-             height="810px"> /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+        <svg width={`${CELL_WIDTH * COL + 10}px`}
+             height={`${CELL_HEIGHT * ROW + 10}px`}
+        > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
           {tetrisMap.map((s, row) =>
             <g key={row}>
               {s.map((c, col) => {
@@ -95,7 +102,7 @@ class TetrisMap extends React.Component {
         <div>
           <h2>Score：{score}</h2>
           <svg width="500px"
-               height="500px">
+               height="300px">
             <g>
               {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
                 const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
