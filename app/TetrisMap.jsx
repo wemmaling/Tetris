@@ -14,6 +14,10 @@ function mapStateToProps(state, ownProps) {
 
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 5、功能键的设置与设计
+// todo 游戏样式
+// todo 掉落预览
+// todo 自动增加难度
+// todo 游戏设置，如旋转方向等
 
 class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量
@@ -62,21 +66,24 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
     const { color: nextColor } = colorMap.get(nextType)
-    const pauseButton = <button onClick={() => this.props.dispatch({ type: A.PAUSE })}>暂停</button>
-    const startButton = <button style={{ marginLeft: '20px' }}
-                                onClick={() => this.props.dispatch({ type: A.START })}>继续</button>
+    const pauseButton = <button onClick={() => {
+      this.props.dispatch({ type: A.PAUSE })
+    }}>暂停</button>
+    const startButton = <button disabled={isGameOver} onClick={() => {
+      this.props.dispatch({ type: A.START })
+    }}>继续</button>
 
     return (
       <div
-        style={{ display: 'flex', filter: isGameOver ? 'blur(3px)' : 'none', overflow: 'hidden' }}>
-        {/*todo 长宽调整*/}
+        style={{ display: 'flex', overflow: 'hidden' }}>
         <svg width={`${CELL_WIDTH * COL + 10}px`}
              height={`${CELL_HEIGHT * ROW + 10}px`}
+             style={{ filter: isGameOver ? 'blur(3px)' : 'none' }}
         > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
           {tetrisMap.map((s, row) =>
             <g key={row}>
@@ -100,6 +107,7 @@ class TetrisMap extends React.Component {
           </g>
         </svg>
         <div>
+          {/*<h2>Level: {speed}</h2>*/}
           <h2>Score：{score}</h2>
           <svg width="500px"
                height="300px">
@@ -113,10 +121,7 @@ class TetrisMap extends React.Component {
             </g>
           </svg>
           <div>
-            <button onClick={() => this.props.dispatch({ type: A.PAUSE })}>暂停</button>
-            <button style={{ marginLeft: '20px' }}
-                    onClick={() => this.props.dispatch({ type: A.START })}>继续
-            </button>
+            {isPaused ? pauseButton : startButton}
           </div>
           {isGameOver ? <GameOverPage /> : null}
         </div>

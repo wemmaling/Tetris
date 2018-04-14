@@ -18,6 +18,7 @@ export const GAME_OVER = 'GAME_OVER'
 export const RORATE = 'RORATE'
 // 改变下落速度
 export const CHANGE_SPEED = 'CHANGE_SPEED'
+export const UPDATE_SPEED = 'UPDATE_SPEED'
 // 长按按键
 export const LR_KEY_UP = 'LR_KEY_UP'
 export const LR_KEY_DOWN = 'LR_KEY_DOWN'

@@ -22,6 +22,7 @@ export default function* rootSaga() {
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
+  // yield takeEvery(A.CHANGE_SPEED, changeSpeed)
   yield fork(watchGameStatus)
 }
 
@@ -49,14 +50,14 @@ function* dropKeyUpAndDown() {
     }
     yield take(A.DROP_KEY_DOWN)
     yield put({
-      type: A.CHANGE_SPEED,
+      type: A.UPDATE_SPEED,
       speed: 20 * speed,
     })
     const task = yield fork(dropTetrominoLoop)
     yield take(A.DROP_KEY_UP)
     yield cancel(task)
     yield put({
-      type: A.CHANGE_SPEED,
+      type: A.UPDATE_SPEED,
       speed: speed,
     })
   }
@@ -213,6 +214,9 @@ function* clearLines() {
       type: A.UPDATE_SCORE,
       getScore: scoreRule.get(result - 1),
     })
+    // yield put({
+    //   type: A.CHANGE_SPEED,
+    // })
   }
 }
 
@@ -262,3 +266,14 @@ function* gameOver() {
   yield put({ type: A.UPDATE_GAME_STATUS })
   yield put({ type: A.PAUSE })
 }
+
+// function* changeSpeed() {
+//   const state = yield select()
+//   const { score, speed } = state.toObject()
+//   if (speed < (score / 1000) + 1) {
+//     yield put({
+//       type: A.UPDATE_SPEED,
+//       speed: speed + 1,
+//     })
+//   }
+// }
