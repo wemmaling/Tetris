@@ -56,6 +56,10 @@ class TetrisMap extends React.Component {
   }
 
   onKeyDown = (event) => {
+    const { isPaused } = this.props
+    if (isPaused) {
+      return null
+    }
     const key = event.key.toLowerCase()
     if (key === 'a') {
       this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
@@ -138,7 +142,7 @@ class TetrisMap extends React.Component {
 
           </div>
           <div style={{ marginLeft: '50px' }}>
-            {isPaused ? pauseButton : startButton}
+            {isPaused ? startButton : pauseButton}
           </div>
         </div>
       </div>

@@ -37,9 +37,11 @@ export default function updateMap(state = initialState, action) {
     return state.set('speed', action.speed)
   } else if (action.type === A.UPDATE_NEXT_TETROMINO) {
     return state.set('nextTetromino', action.next)
-  } else if (action.type === A.PAUSE || action.type === A.START) {
-    return state.update('isPaused', v => !v)
-  } else if (action.type === A.RESTART) {
+  } else if (action.type === A.PAUSE) {
+    return state.set('isPaused', true)
+  } else if(action.type === A.START) {
+    return state.set('isPaused', false)
+  }else if (action.type === A.RESTART) {
     return initialState
   } else {
     return state
