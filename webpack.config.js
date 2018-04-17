@@ -27,6 +27,10 @@ module.exports = {
           plugins: ["transform-react-jsx", "transform-class-properties"],
           // presets: ["es2015"]
         }
+      },
+      {
+        test: /\.styl$/,
+        use: ['style-loader', 'css-loader', 'stylus-loader']
       }
     ]
   },

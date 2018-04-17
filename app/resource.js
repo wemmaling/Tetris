@@ -2,7 +2,7 @@ import { Map, List } from "immutable"
 import { rorate } from 'utils'
 
 export const colorMap = Map({
-  'X': { color: 'white' },
+  'X': { color: 'black' },
   'Z': { color: '#FF0000' },
   'J': { color: '#0000FF' },
   'S': { color: '#00FF00' },

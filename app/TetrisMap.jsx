@@ -1,23 +1,30 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import GameOverPage from 'GameOverPage'
+import Button from 'Button'
 import Cell from 'Cell'
 import { indexToCoordinate } from 'utils'
 import * as A from 'action'
 import { colorMap, directionMapDelta } from 'resource'
 import { CELL_WIDTH, CELL_HEIGHT, COL, ROW } from './constants'
+import './style/TetrisMap.styl'
 
 
 function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
+// todo 旋转问题以及显示下一物块的问题
+// todo 样式的重复使用
+// todo 暂停时候还可以旋转的问题
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 5、功能键的设置与设计
 // todo 游戏样式
 // todo 掉落预览
 // todo 自动增加难度
 // todo 游戏设置，如旋转方向等
+
+React.createElement()
 
 class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量
@@ -71,59 +78,68 @@ class TetrisMap extends React.Component {
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
     const { color: nextColor } = colorMap.get(nextType)
-    const pauseButton = <button onClick={() => {
+    const pauseButton = <Button onClick={() => {
       this.props.dispatch({ type: A.PAUSE })
-    }}>暂停</button>
-    const startButton = <button disabled={isGameOver} onClick={() => {
+    }} text="暂停" />
+    const startButton = <Button disabled={isGameOver} onClick={() => {
       this.props.dispatch({ type: A.START })
-    }}>继续</button>
+    }} text="继续" />
 
     return (
-      <div
-        style={{ display: 'flex', overflow: 'hidden' }}>
-        <svg width={`${CELL_WIDTH * COL + 10}px`}
-             height={`${CELL_HEIGHT * ROW + 10}px`}
-             style={{ filter: isGameOver ? 'blur(3px)' : 'none' }}
-        > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
-          {tetrisMap.map((s, row) =>
-            <g key={row}>
-              {s.map((c, col) => {
-                const { x, y } = indexToCoordinate(row, col)
-                const t = tetrisMap.get(row).get(col)
-                return (
-                  <Cell key={col} x={x} y={y}
-                        fill={t === 'B' ? 'pink' : colorMap.get(t).color} />
-                )
-              })}
-            </g>
-          )}
-          <g>
-            {directionMapDelta.get(type).get(direction).map((every, index) => {
-              const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
-              return (
-                <Cell key={index} x={x} y={y} fill={color} />
-              )
-            })}
-          </g>
-        </svg>
-        <div>
-          {/*<h2>Level: {speed}</h2>*/}
-          <h2>Score：{score}</h2>
-          <svg width="500px"
-               height="300px">
+      <div className="wrap-content">
+        <div className="cell-content">
+          <svg width={`${CELL_WIDTH * COL}px`}
+               height={`${CELL_HEIGHT * ROW}px`}
+               style={{ border: 'solid #7A8382 1px', filter: isGameOver ? 'blur(3px)' : 'none' }}
+          > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+            {tetrisMap.map((s, row) =>
+              <g key={row}>
+                {s.map((c, col) => {
+                  const { x, y } = indexToCoordinate(row, col)
+                  const t = tetrisMap.get(row).get(col)
+                  return (
+                    <Cell key={col} x={x} y={y}
+                          fill={t === 'B' ? 'pink' : colorMap.get(t).color} />
+                  )
+                })}
+              </g>
+            )}
             <g>
-              {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
-                const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
+              {directionMapDelta.get(type).get(direction).map((every, index) => {
+                const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
                 return (
-                  <Cell key={index} x={x} y={y} fill={nextColor} />
+                  <Cell key={index} x={x} y={y} fill={color} />
                 )
               })}
             </g>
           </svg>
-          <div>
+          {isGameOver ? <GameOverPage /> : null}
+        </div>
+        <div className="right-content">
+          <div className="score-content">
+            {/*<h2>Level: {speed}</h2>*/}
+            <h3>Score</h3>
+            <div className="score">{score}</div>
+          </div>
+          <div className="next-content">
+            <h3>Next</h3>
+            <svg
+              width="280px"
+              height="280px">
+              <g>
+                {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
+                  const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
+                  return (
+                    <Cell key={index} x={x} y={y} fill={nextColor} />
+                  )
+                })}
+              </g>
+            </svg>
+
+          </div>
+          <div style={{ marginLeft: '50px' }}>
             {isPaused ? pauseButton : startButton}
           </div>
-          {isGameOver ? <GameOverPage /> : null}
         </div>
       </div>
     )
