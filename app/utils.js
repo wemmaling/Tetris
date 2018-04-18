@@ -1,6 +1,8 @@
 import { List, Map } from "immutable"
 import { CELL_HEIGHT, CELL_WIDTH, ROW, COL } from './constants.js'
 import { colorMap, directionMapDelta } from './resource'
+import { put } from 'redux-saga/effects'
+import * as A from './action'
 
 export function indexToCoordinate(row, col) {
   const x = CELL_WIDTH * col
@@ -25,6 +27,7 @@ export function canTetrominoMove(TerisMap, nextState) {
 
 const keysArray = colorMap.keySeq().toList().delete(0).toArray()
 
+// 随机生成落下的物块（随机包括类型和方向）
 export function dropRandom() {
   const index = Math.floor(Math.random() * 7)
   const type = keysArray[index]
@@ -36,6 +39,16 @@ export function dropRandom() {
   return Map({ type, row: -maxRow, col: 4, direction })
 }
 
+// 旋转坐标的变化
 export function rorate(delta) {
   return delta.map(([dRow, dCol]) => [dCol, -dRow])
+}
+
+// 预测最终的位置
+export function forecastPosition(tetrisMap, curTetromino) {
+  let nextPosition = curTetromino
+  while (canTetrominoMove(tetrisMap, nextPosition)) {
+    nextPosition = nextPosition.update('row', v => v + 1)
+  }
+  return nextPosition.update('row', v => v - 1)
 }

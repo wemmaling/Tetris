@@ -10,7 +10,7 @@ import { delay } from 'redux-saga'
 import { Map, Repeat } from 'immutable'
 import * as A from './action'
 import { scoreRule, directionMapDelta } from './resource'
-import { canTetrominoMove, dropRandom } from './utils'
+import { canTetrominoMove, dropRandom, forecastPosition } from './utils'
 import { COL } from './constants'
 
 export default function* rootSaga() {
@@ -22,6 +22,7 @@ export default function* rootSaga() {
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
+  yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
   // yield takeEvery(A.CHANGE_SPEED, changeSpeed)
   yield fork(watchGameStatus)
 }
@@ -134,11 +135,25 @@ function* moveTetromino({ dRow, dCol }) {
       })
     } else if (canMove) { // 保证物体在下个位置不会碰到墙壁或与其他物块碰撞
       yield put({
-        type: A.UPDATE_TETROMINO,
-        curTetromino: nextPosition,
+        type: A.CHANGE_TETROMINO,
+        next: nextPosition,
       })
     }
   }
+}
+
+function* changeTetromino({ next }) {
+  const state = yield select()
+  const { tetrisMap } = state.toObject()
+  yield put({
+    type: A.UPDATE_TETROMINO,
+    next,
+  })
+  yield put({
+    type: A.UPDATE_FORECAST,
+    forecast: forecastPosition(tetrisMap, next)
+  })
+
 }
 
 // 控制物块的直接下落
@@ -147,13 +162,13 @@ function* dropDirectly() {
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   if (!isGameOver) {
-    let nextPosition = curTetromino
-    while (canTetrominoMove(tetrisMap, nextPosition)) {
-      nextPosition = nextPosition.update('row', v => v + 1)
-    }
+    // let nextPosition = curTetromino
+    // while (canTetrominoMove(tetrisMap, nextPosition)) {
+    //   nextPosition = nextPosition.update('row', v => v + 1)
+    // }
     yield put({
-      type: A.UPDATE_TETROMINO,
-      curTetromino: nextPosition.update('row', v => v - 1)
+      type: A.CHANGE_TETROMINO,
+      next: forecastPosition(tetrisMap, curTetromino)
     })
     yield put({ type: A.MERGE_MAP })
   }
@@ -179,12 +194,14 @@ function* mergeMap() {
   // 如果游戏结束，则不继续掉落新的物块
   if (!isGameOver) {
     yield put({
-      type: A.DROP_NEW_TETROMINO,
-    })
-    yield put({
       type: A.UPDATE_MAP,
       newMap,
     })
+
+    yield put({
+      type: A.DROP_NEW_TETROMINO,
+    })
+
     // yield delay(1000)
     yield put({
       type: A.CLEAR_LINES,
@@ -227,8 +244,8 @@ function* dropNewTetromino() {
   const { isGameOver, nextTetromino } = state.toObject()
   if (!isGameOver) {
     yield put({
-      type: A.RESET_TETROMINO,
-      nextTetromino,
+      type: A.CHANGE_TETROMINO,
+      next: nextTetromino,
     })
     yield put({
       type: A.UPDATE_NEXT_TETROMINO,
@@ -252,8 +269,8 @@ function* rorateTetromino() {
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   if (canMove && curTetromino.get('type') !== 'O') {
     yield put({
-      type: A.UPDATE_TETROMINO,
-      curTetromino: nextPosition,
+      type: A.CHANGE_TETROMINO,
+      next: nextPosition,
     })
   }
 }

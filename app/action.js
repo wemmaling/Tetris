@@ -3,10 +3,10 @@ export const MERGE_MAP = 'MERGE_MAP'
 export const UPDATE_MAP = 'UPDATA_MAP'
 // 正在下落过程中的Tetromino的移动
 export const MOVE_TETROMINO = 'MOVE_TETROMINO'
+export const CHANGE_TETROMINO = 'CHANGE_TETROMINO'
 export const UPDATE_TETROMINO = 'UPDATE_TETROMINO'
 // 合并背景后重新掉落新的Tetromino
 export const DROP_NEW_TETROMINO = 'DROP_NEW_TETROMINO'
-export const RESET_TETROMINO = 'RESET_TETROMINO'
 export const UPDATE_NEXT_TETROMINO = 'UPDATE_NEXT_TETROMINO'
 // 消除
 export const CLEAR_LINES = 'CLEAR_LINES'
@@ -32,3 +32,4 @@ export const RESTART = 'RESTART'
 export const START = 'START'
 export const PAUSE = 'PAUSE'
 export const UPDATE_GAME_STATUS = 'UPDATE_GAME_STATUS'
+export const UPDATE_FORECAST = 'UPDATE_FORECAST'

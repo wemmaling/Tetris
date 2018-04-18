@@ -77,7 +77,7 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed, forecast } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
@@ -88,6 +88,24 @@ class TetrisMap extends React.Component {
     const startButton = <Button disabled={isGameOver} onClick={() => {
       this.props.dispatch({ type: A.START })
     }} text="继续" />
+
+    let forecastRender = null
+    if (forecast !== null) {
+      const { type: fType, row: fRow, col: fCol, direction: fDirection } = forecast.toObject()
+      // console.log(forecast.toJS())
+      // console.log('type:' + fType)
+      // console.log('row' + fRow)
+      // console.log('col' + fCol)
+      // console.log('direction' + fDirection)
+      forecastRender = <g>
+        {directionMapDelta.get(fType).get(fDirection).map((every, index) => {
+          const { x, y } = indexToCoordinate(fRow + every[0], fCol + every[1])
+          return (
+            <Cell key={index} x={x} y={y} fill={color} real={false} />
+          )
+        })}
+      </g>
+    }
 
     return (
       <div className="wrap-content">
@@ -103,7 +121,7 @@ class TetrisMap extends React.Component {
                   const t = tetrisMap.get(row).get(col)
                   return (
                     <Cell key={col} x={x} y={y}
-                          fill={t === 'B' ? 'pink' : colorMap.get(t).color} />
+                          fill={t === 'B' ? 'pink' : colorMap.get(t).color} real={true} />
                   )
                 })}
               </g>
@@ -112,10 +130,11 @@ class TetrisMap extends React.Component {
               {directionMapDelta.get(type).get(direction).map((every, index) => {
                 const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
                 return (
-                  <Cell key={index} x={x} y={y} fill={color} />
+                  <Cell key={index} x={x} y={y} fill={color} real={true} />
                 )
               })}
             </g>
+            {forecastRender}
           </svg>
           {isGameOver ? <GameOverPage /> : null}
         </div>
@@ -134,7 +153,7 @@ class TetrisMap extends React.Component {
                 {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
                   const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
                   return (
-                    <Cell key={index} x={x} y={y} fill={nextColor} />
+                    <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
                   )
                 })}
               </g>
