@@ -95,7 +95,7 @@ function* quickMoveLeftOrRight(dRow, dCol) {
 // tetromino的自动下落
 function* dropTetrominoLoop() {
   while (true) {
-    console.log('drop-loop')
+    // console.log('drop-loop')
     const state = yield select()
     // todo 对游戏结束的判定有点延迟，如果break的话重新开始就不会自动下落了
     // if (state.get('isGameOver')) {
@@ -114,7 +114,7 @@ function* dropTetrominoLoop() {
 
 // 通过键盘控制tetromino的移动
 function* moveTetromino({ dRow, dCol }) {
-  console.log('move-tetromino')
+  // console.log('move-tetromino')
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   const { row, col } = curTetromino.toObject()
@@ -158,7 +158,7 @@ function* changeTetromino({ next }) {
 
 // 控制物块的直接下落
 function* dropDirectly() {
-  console.log('drop-directly')
+  // console.log('drop-directly')
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   if (!isGameOver) {
@@ -176,7 +176,7 @@ function* dropDirectly() {
 
 // 当物块落下到背景边缘或者碰到其他物体时，动态物块融入背景板
 function* mergeMap() {
-  console.log('merge-map')
+  // console.log('merge-map')
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   const { type, row, col, direction } = curTetromino.toObject()
@@ -239,7 +239,7 @@ function* clearLines() {
 
 // 掉落新的tetromino
 function* dropNewTetromino() {
-  console.log('drop-new-tetromino')
+  // console.log('drop-new-tetromino')
   const state = yield select()
   const { isGameOver, nextTetromino } = state.toObject()
   if (!isGameOver) {
@@ -262,10 +262,10 @@ function* dropNewTetromino() {
 
 // 旋转
 function* rorateTetromino() {
-  console.log('rorate-tetromino')
+  // console.log('rorate-tetromino')
   const state = yield select()
   const { tetrisMap, curTetromino } = state.toObject()
-  const nextPosition = curTetromino.update('direction', v => (v + 1) % 4)
+  const nextPosition = curTetromino.update('direction', v => (v - 1) % 4)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   if (canMove && curTetromino.get('type') !== 'O') {
     yield put({

@@ -14,6 +14,7 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
+// todo 设置按钮（提示的出现和旋转的选择）
 // todo 旋转问题以及显示下一物块的问题
 // todo 样式的重复使用
 // todo 暂停时候还可以旋转的问题
@@ -136,7 +137,10 @@ class TetrisMap extends React.Component {
             </g>
             {forecastRender}
           </svg>
-          {isGameOver ? <GameOverPage /> : null}
+          {isGameOver ? <div className="game-over-wrapper">
+            <GameOverPage />
+          </div> : null}
+
         </div>
         <div className="right-content">
           <div className="score-content">
@@ -158,7 +162,6 @@ class TetrisMap extends React.Component {
                 })}
               </g>
             </svg>
-
           </div>
           <div style={{ marginLeft: '50px' }}>
             {isPaused ? startButton : pauseButton}
