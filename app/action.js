@@ -33,3 +33,6 @@ export const START = 'START'
 export const PAUSE = 'PAUSE'
 export const UPDATE_GAME_STATUS = 'UPDATE_GAME_STATUS'
 export const UPDATE_FORECAST = 'UPDATE_FORECAST'
+
+export const HELP_ON = 'HELP_ON'
+export const HELP_DOWN = 'HELP_DOWN'

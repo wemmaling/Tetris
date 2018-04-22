@@ -17,6 +17,8 @@ const initialState = Map({
   isGameOver: false,
   // 游戏是否暂停
   isPaused: false,
+  // 帮助模式
+  helpSchemaOn: false,
 })
 
 export default function updateMap(state = initialState, action) {
@@ -43,6 +45,10 @@ export default function updateMap(state = initialState, action) {
     return initialState
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
+  } else if (action.type === A.HELP_ON) {
+    return state.set('helpSchemaOn', true)
+  } else if (action.type === A.HELP_DOWN) {
+    return state.set('helpSchemaOn', false)
   } else {
     return state
   }

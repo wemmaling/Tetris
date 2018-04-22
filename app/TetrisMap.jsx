@@ -78,7 +78,7 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed, forecast } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed, forecast, helpSchemaOn } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
@@ -90,14 +90,16 @@ class TetrisMap extends React.Component {
       this.props.dispatch({ type: A.START })
     }} text="继续" />
 
+    const helpOn = <Button onClick={() => {
+      this.props.dispatch({ type: A.HELP_ON })
+    }} text="简易模式" />
+    const helpDown = <Button disabled={isGameOver} onClick={() => {
+      this.props.dispatch({ type: A.HELP_DOWN })
+    }} text="正常模式" />
+
     let forecastRender = null
     if (forecast !== null) {
       const { type: fType, row: fRow, col: fCol, direction: fDirection } = forecast.toObject()
-      // console.log(forecast.toJS())
-      // console.log('type:' + fType)
-      // console.log('row' + fRow)
-      // console.log('col' + fCol)
-      // console.log('direction' + fDirection)
       forecastRender = <g>
         {directionMapDelta.get(fType).get(fDirection).map((every, index) => {
           const { x, y } = indexToCoordinate(fRow + every[0], fCol + every[1])
@@ -122,7 +124,7 @@ class TetrisMap extends React.Component {
                   const t = tetrisMap.get(row).get(col)
                   return (
                     <Cell key={col} x={x} y={y}
-                          fill={t === 'B' ? 'pink' : colorMap.get(t).color} real={true} />
+                          fill={colorMap.get(t).color} real={true} />
                   )
                 })}
               </g>
@@ -135,7 +137,7 @@ class TetrisMap extends React.Component {
                 )
               })}
             </g>
-            {forecastRender}
+            {helpSchemaOn ? forecastRender : null}
           </svg>
           {isGameOver ? <div className="game-over-wrapper">
             <GameOverPage />
@@ -165,6 +167,9 @@ class TetrisMap extends React.Component {
           </div>
           <div style={{ marginLeft: '50px' }}>
             {isPaused ? startButton : pauseButton}
+          </div>
+          <div style={{ marginLeft: '50px', marginTop: '20px' }}>
+            {helpSchemaOn ? helpDown : helpOn}
           </div>
         </div>
       </div>
