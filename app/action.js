@@ -36,3 +36,5 @@ export const UPDATE_FORECAST = 'UPDATE_FORECAST'
 
 export const HELP_ON = 'HELP_ON'
 export const HELP_DOWN = 'HELP_DOWN'
+
+export const UPDATE_LEVEL = 'UPDATE_LEVEL'

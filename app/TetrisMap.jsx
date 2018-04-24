@@ -78,7 +78,7 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, speed, forecast, helpSchemaOn } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
@@ -149,6 +149,8 @@ class TetrisMap extends React.Component {
             {/*<h2>Level: {speed}</h2>*/}
             <h3>Score</h3>
             <div className="score">{score}</div>
+            <h3>Level</h3>
+            <div className="score">{level}</div>
           </div>
           <div className="next-content">
             <h3>Next</h3>
@@ -165,10 +167,8 @@ class TetrisMap extends React.Component {
               </g>
             </svg>
           </div>
-          <div style={{ marginLeft: '50px' }}>
+          <div style={{ display: 'flex', marginLeft: '40px', alignItems: 'center' }}>
             {isPaused ? startButton : pauseButton}
-          </div>
-          <div style={{ marginLeft: '50px', marginTop: '20px' }}>
             {helpSchemaOn ? helpDown : helpOn}
           </div>
         </div>

@@ -11,6 +11,8 @@ const initialState = Map({
   forecast: null,
   // 计算得分，每下落一个物块得10分，一次性消1行100分，2行200，3行400，4行800
   score: 0,
+  // 关卡
+  level: 1,
   // 下落速度
   speed: 1,
   // 游戏是否结束
@@ -49,6 +51,8 @@ export default function updateMap(state = initialState, action) {
     return state.set('helpSchemaOn', true)
   } else if (action.type === A.HELP_DOWN) {
     return state.set('helpSchemaOn', false)
+  } else if (action.type === A.UPDATE_LEVEL) {
+    return state.update('level', v => v + 1)
   } else {
     return state
   }

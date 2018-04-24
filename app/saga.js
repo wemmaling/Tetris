@@ -23,7 +23,6 @@ export default function* rootSaga() {
   yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
-  // yield takeEvery(A.CHANGE_SPEED, changeSpeed)
   yield fork(watchGameStatus)
 }
 
@@ -31,6 +30,7 @@ export default function* rootSaga() {
 function* watchGameStatus() {
   while (true) {
     yield take(A.START)
+    // const updateLevel = yield fork(watchUpdateLevel)
     const dropTask = yield fork(dropTetrominoLoop)
     const dropListenTask = yield fork(dropKeyUpAndDown)
     const lrListenTask = yield fork(lrKeyUpAndDown)
@@ -38,6 +38,7 @@ function* watchGameStatus() {
     yield cancel(dropTask)
     yield cancel(dropListenTask)
     yield cancel(lrListenTask)
+    // yield cancel(updateLevel)
   }
 }
 
@@ -45,11 +46,13 @@ function* watchGameStatus() {
 function* dropKeyUpAndDown() {
   while (true) {
     const state = yield select()
-    const { isGameOver, speed } = state.toObject()
+    const { isGameOver } = state.toObject()
     if (isGameOver) {
       break
     }
     yield take(A.DROP_KEY_DOWN)
+    const newState = yield select()
+    const speed = newState.get('speed')
     yield put({
       type: A.UPDATE_SPEED,
       speed: 20 * speed,
@@ -178,7 +181,7 @@ function* dropDirectly() {
 function* mergeMap() {
   // console.log('merge-map')
   const state = yield select()
-  const { tetrisMap, curTetromino, isGameOver } = state.toObject()
+  const { tetrisMap, curTetromino, isGameOver, score, level } = state.toObject()
   const { type, row, col, direction } = curTetromino.toObject()
   const delta = directionMapDelta.get(type).get(direction)
   let newMap = tetrisMap
@@ -212,7 +215,7 @@ function* mergeMap() {
 // 与背景板融合后判断是否有行满足消除的要求并更新Map
 function* clearLines() {
   const state = yield select()
-  const { tetrisMap } = state.toObject()
+  const { tetrisMap, score, level, speed } = state.toObject()
   let result = 0
   let newMap = tetrisMap
   tetrisMap.map((s, row) => {
@@ -231,6 +234,16 @@ function* clearLines() {
       type: A.UPDATE_SCORE,
       getScore: scoreRule.get(result - 1),
     })
+    if (level < ((score + scoreRule.get(result - 1)) / 1000) + 1) {
+      yield put({
+        type: A.UPDATE_SPEED,
+        speed: (level + 1),
+      })
+      yield put({
+        type: A.UPDATE_LEVEL,
+      })
+
+    }
     // yield put({
     //   type: A.CHANGE_SPEED,
     // })
@@ -284,13 +297,19 @@ function* gameOver() {
   yield put({ type: A.PAUSE })
 }
 
-// function* changeSpeed() {
-//   const state = yield select()
-//   const { score, speed } = state.toObject()
-//   if (speed < (score / 1000) + 1) {
-//     yield put({
-//       type: A.UPDATE_SPEED,
-//       speed: speed + 1,
-//     })
+// function* watchUpdateLevel() {
+//   while (true) {
+//     const state = yield select()
+//     const { score, level } = state.toObject()
+//     if (level < (score / 100) + 1) {
+//       yield put({
+//         type: A.UPDATE_LEVEL,
+//       })
+//       yield put({
+//         type: A.UPDATE_SPEED,
+//         speed: level + 1,
+//       })
+//     }
+//     yield delay()
 //   }
 // }
