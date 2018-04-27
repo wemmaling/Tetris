@@ -111,10 +111,10 @@ class TetrisMap extends React.Component {
     }
 
     return (
-      <div className="wrap-content">
-        <div className="cell-content">
-          <svg width={`${CELL_WIDTH * COL}px`}
-               height={`${CELL_HEIGHT * ROW}px`}
+      <div style={{ height: `${window.outerHeight - 150}px` }} className="wrap-content">
+        <div style={{ height: `${window.outerHeight - 300}px` }} className="cell-content">
+          <svg width={`${window.outerHeight / 30 * COL}px`}
+               height={`${window.outerHeight / 30 * ROW}px`}
                style={{ border: 'solid #7A8382 1px', filter: isGameOver ? 'blur(3px)' : 'none' }}
           > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
             {tetrisMap.map((s, row) =>
@@ -147,10 +147,14 @@ class TetrisMap extends React.Component {
         <div className="right-content">
           <div className="score-content">
             {/*<h2>Level: {speed}</h2>*/}
-            <h3>Score</h3>
-            <div className="score">{score}</div>
-            <h3>Level</h3>
-            <div className="score">{level}</div>
+            <div className="part">
+              <span>Score</span>
+              <div className="score">{score}</div>
+            </div>
+            <div className="part">
+              <span>Level</span>
+              <div className="score">{level}</div>
+            </div>
           </div>
           <div className="next-content">
             <h3>Next</h3>

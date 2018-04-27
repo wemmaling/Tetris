@@ -5,10 +5,14 @@
   border-radius 50px
   display flex
   justify-content center
+  align-items stretch
   opacity 0.9
-  margin auto
+  margin auto auto
   padding 50px
+  overflow hidden
   .cell-content
+    display flex
+    align-items center
     position relative
     background black
     border solid #6c7373 10px
@@ -27,35 +31,45 @@
   .right-content
     display flex
     flex-direction column
-    justify-content space-around
+    justify-content start
     .score-content
       margin-left 50px
       margin-bottom 20px
       width 310px
-      height 350px
+      height 30%
       display flex
       flex-direction column
+      justify-content space-around
       align-items center
       font-size 24px
       color white
       background black
       border solid #6c7373 10px
       border-radius 30px
-      .score
+      .part
         display flex
+        flex-direction column
         justify-content center
         align-items center
-        width 200px
-        height 50px
-        background #2a2a2a
-        border solid #6c7373 1px
-        border-radius 20px
+        .score
+          display flex
+          justify-content center
+          align-items center
+          width 150px
+          height 18%
+          background #2a2a2a
+          border solid #6c7373 1px
+          border-radius 20px
+          //margin-bottom 20px
+        > span
+          margin-bottom 20px
+          font-size 24px
 
     .next-content
       margin-left 50px
       margin-bottom 20px
       width 310px
-      height 400px
+      height 40%
       display flex
       flex-direction column
       align-items center
