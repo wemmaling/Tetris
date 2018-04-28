@@ -31,6 +31,7 @@ class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量
   rorateKeyDown = false
   dropDirectly = false
+  pauseKeyDown = false
 
   componentDidMount() {
     this.props.dispatch({ type: A.START })
@@ -53,27 +54,36 @@ class TetrisMap extends React.Component {
       this.rorateKeyDown = false
     } else if (event.keyCode === 32) {
       this.dropDirectly = false
+    } else if (event.keyCode === 27) {
+      this.pauseKeyDown = false
     }
   }
 
   onKeyDown = (event) => {
     const { isPaused } = this.props
-    if (isPaused) {
+    const key = event.key.toLowerCase()
+    if (isPaused && event.keyCode === 27) {
+      this.props.dispatch({ type: A.START })
+      this.pauseKeyDown = true
       return null
     }
-    const key = event.key.toLowerCase()
-    if (key === 'a') {
-      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
-    } else if (key === 'd') {
-      this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
-    } else if (key === 's') {
-      this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
-    } else if (key === 'w' && !this.rorateKeyDown) {
-      this.props.dispatch({ type: A.RORATE })
-      this.rorateKeyDown = true
-    } else if (event.keyCode === 32 && !this.dropDirectly) {
-      this.props.dispatch({ type: A.DROP_DIRECTLY })
-      this.dropDirectly = true
+    if (!isPaused) {
+      if (key === 'a') {
+        this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
+      } else if (key === 'd') {
+        this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
+      } else if (key === 's') {
+        this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
+      } else if (key === 'w' && !this.rorateKeyDown) {
+        this.props.dispatch({ type: A.RORATE })
+        this.rorateKeyDown = true
+      } else if (event.keyCode === 32 && !this.dropDirectly) {
+        this.props.dispatch({ type: A.DROP_DIRECTLY })
+        this.dropDirectly = true
+      } else if (event.keyCode === 27) {
+        this.props.dispatch({ type: A.PAUSE })
+        this.pauseKeyDown = true
+      }
     }
   }
 

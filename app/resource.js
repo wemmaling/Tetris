@@ -31,8 +31,8 @@ for (let index = 0; index < 3; index += 1) {
   iDelta = iDelta.insert(iDelta.size, rorate(iDelta.get(iDelta.size - 1)))
 }
 
-// 计算得分，每下落一个物块得10分，一次性消1行100分，2行200，3行400，4行800
-export const scoreRule = List([100, 200, 400, 800])
+// 计算得分，每下落一个物块得10分，一次性消1行100分，2行300，3行500，4行800
+export const scoreRule = List([100, 300, 500, 800])
 
 export const directionMapDelta = Map({
   'Z': zDelta,
