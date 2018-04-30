@@ -11,7 +11,7 @@ class GameOverPage extends React.Component {
       <div className="game-over">
         <h4>Your score</h4>
         <div className="score">{score}</div>
-        <Button onClick={() => this.props.dispatch({ type: A.RESTART })} text="重新开始" />
+        <Button onClick={() => this.props.dispatch({ type: A.RESTART })} disabled={false} text="重新开始" />
       </div>
     )
   }

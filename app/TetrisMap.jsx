@@ -8,6 +8,7 @@ import * as A from 'action'
 import { colorMap, directionMapDelta } from 'resource'
 import { CELL_WIDTH, CELL_HEIGHT, COL, ROW } from './constants'
 import './style/TetrisMap.styl'
+import { List } from "immutable"
 
 
 function mapStateToProps(state, ownProps) {
@@ -93,19 +94,44 @@ class TetrisMap extends React.Component {
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
     const { color: nextColor } = colorMap.get(nextType)
-    const pauseButton = <Button onClick={() => {
-      this.props.dispatch({ type: A.PAUSE })
-    }} text="暂停" />
-    const startButton = <Button disabled={isGameOver} onClick={() => {
-      this.props.dispatch({ type: A.START })
-    }} text="继续" />
 
-    const helpOn = <Button onClick={() => {
-      this.props.dispatch({ type: A.HELP_ON })
-    }} text="简易模式" />
-    const helpDown = <Button disabled={isGameOver} onClick={() => {
-      this.props.dispatch({ type: A.HELP_DOWN })
-    }} text="正常模式" />
+    const delta = directionMapDelta.get(nextType).get(nextDir)
+    const colDeltaList = List(delta.map(every => every[1]))
+    const rowDeltaList = List(delta.map(every => every[0]))
+    const maxRow = rowDeltaList.max()
+    const minRow = rowDeltaList.min()
+    const minCol = colDeltaList.min()
+    const maxCol = colDeltaList.max()
+
+    const pauseButton = <Button
+      onClick={() => {
+        this.props.dispatch({ type: A.PAUSE })
+      }}
+      text="暂停"
+      disabled={isGameOver}
+    />
+    const startButton = <Button
+      disabled={isGameOver}
+      onClick={() => {
+        this.props.dispatch({ type: A.START })
+      }}
+      text="继续"
+    />
+
+    const helpOn = <Button
+      onClick={() => {
+        this.props.dispatch({ type: A.HELP_ON })
+      }}
+      text="简易模式"
+      disabled={isGameOver}
+    />
+    const helpDown = <Button
+      disabled={isGameOver}
+      onClick={() => {
+        this.props.dispatch({ type: A.HELP_DOWN })
+      }}
+      text="正常模式"
+    />
 
     let forecastRender = null
     if (forecast !== null) {
@@ -168,20 +194,23 @@ class TetrisMap extends React.Component {
           </div>
           <div className="next-content">
             <h3>Next</h3>
-            <svg
-              width="280px"
-              height="280px">
-              <g>
-                {directionMapDelta.get(nextType).get(nextDir).map((every, index) => {
-                  const { x, y } = indexToCoordinate(3 + every[0], 3 + every[1])
-                  return (
-                    <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
-                  )
-                })}
-              </g>
-            </svg>
+            <div>
+              <svg
+                width={`${CELL_WIDTH * (maxCol - minCol + 1)}px`}
+                height={`${CELL_HEIGHT * (maxRow - minRow + 1 === 1 ? 2 : maxRow - minRow + 1)}px`}>
+                <g>
+                  {delta.map((every, index) => {
+                    const { x, y } = indexToCoordinate(every[0] - minRow, every[1] - minCol)
+                    return (
+                      <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
+                    )
+                  })}
+                </g>
+              </svg>
+            </div>
           </div>
-          <div style={{ display: 'flex', marginLeft: '40px', alignItems: 'center' }}>
+          <div className="button-content"
+               style={{ display: 'flex', marginLeft: '40px', alignItems: 'center' }}>
             {isPaused ? startButton : pauseButton}
             {helpSchemaOn ? helpDown : helpOn}
           </div>

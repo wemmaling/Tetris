@@ -31,7 +31,7 @@ const keysArray = colorMap.keySeq().toList().delete(0).toArray()
 export function dropRandom() {
   const index = Math.floor(Math.random() * 7)
   const type = keysArray[index]
-  const direction = Math.floor(Math.random() * 4)
+  const direction = 0
   const delta = directionMapDelta.get(type).get(direction)
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
