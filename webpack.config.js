@@ -49,7 +49,7 @@ module.exports = {
   },
 
   devServer: {
-    contentBase: __dirname,
+    contentBase: [path.resolve(__dirname, 'app/static'), __dirname],
     host: '0.0.0.0',
     hot: true
   },

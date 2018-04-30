@@ -149,7 +149,7 @@ class TetrisMap extends React.Component {
           <span className="header-content">操作说明</span>
           <img
             className="image"
-            src="/app/static/control.png"
+            src="control.png"
             alt="control"
           />
           {/*<span className="header-content" style={{ marginTop: '300px' }} />*/}
