@@ -1,82 +1,108 @@
-
-.wrap-content
-  width 1000px
-  background #b7b7af
-  border-radius 50px
+.all-content
   display flex
-  justify-content center
-  align-items stretch
-  opacity 0.9
-  margin auto auto
-  padding 50px
   overflow hidden
-  .cell-content
-    display flex
-    align-items center
-    position relative
-    background black
-    border solid #6c7373 10px
-    border-radius 30px
-    padding 20px
-    .game-over-wrapper
-      position absolute
-      left 0
-      right 0
-      top 0
-      bottom 0
-      display flex
-      justify-content center
-      align-items center
-
-  .right-content
+  .text-content
     display flex
     flex-direction column
-    justify-content start
-    .score-content
-      margin-left 50px
-      margin-bottom 20px
-      width 310px
-      //height 30%
+    margin 0 20px 0 20px
+    padding 10px
+    border dotted #dcdcd2 3px
+    > span
       display flex
-      flex-direction column
       justify-content center
       align-items center
+      height 80px
+      text-align center
       font-size 24px
-      color white
+      font-weight bold
+      margin-bottom 20px
+      background #ccd1dc
+      border-radius 5px
+
+  .wrap-content
+    position relative
+    width 1000px
+    background #ccd1dc
+    border-radius 20px
+    display flex
+    justify-content center
+    align-items stretch
+    opacity 0.9
+    margin auto auto
+    padding 50px
+    .cell-content
+      display flex
+      align-items center
       background black
       border solid #6c7373 10px
       border-radius 30px
-      .part
+      padding 20px
+    .right-content
+      display flex
+      flex-direction column
+      justify-content start
+      .score-content
+        margin-left 50px
+        margin-bottom 20px
+        width 310px
+        //height 30%
         display flex
         flex-direction column
         justify-content center
         align-items center
-        padding 16px
-        .score
+        font-size 24px
+        color white
+        background black
+        border solid #6c7373 10px
+        border-radius 30px
+        .part
           display flex
+          flex-direction column
           justify-content center
           align-items center
-          width 120px
-          height 20%
-          background #2a2a2a
-          border solid #6c7373 1px
-          border-radius 20px
+          padding 16px
+          .score
+            display flex
+            justify-content center
+            align-items center
+            width 120px
+            height 20%
+            background #2a2a2a
+            border solid #6c7373 1px
+            border-radius 20px
           //margin-bottom 20px
+          > span
+            margin-bottom 10px
+            font-size 24px
+            font-weight bold
+
+      .next-content
+        margin-left 50px
+        margin-bottom 20px
+        width 310px
+        display flex
+        flex-direction column
+        align-items center
+        color white
+        background black
+        border solid #6c7373 10px
+        border-radius 30px
         > span
-          margin-bottom 10px
+          margin 20px 10px
           font-size 24px
+          font-weight bold
 
-    .next-content
-      margin-left 50px
-      margin-bottom 20px
-      width 310px
-      display flex
-      flex-direction column
-      align-items center
-      font-size 24px
-      color white
-      background black
-      border solid #6c7373 10px
-      border-radius 30px
-    //.button-content
+      .button-content
+        display flex
+        margin-left 40px
+        align-items center
 
+  .game-over-wrapper
+    position absolute
+    left 0
+    right 0
+    top 0
+    bottom 0
+    display flex
+    justify-content center
+    align-items center

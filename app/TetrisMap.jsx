@@ -61,6 +61,9 @@ class TetrisMap extends React.Component {
   }
 
   onKeyDown = (event) => {
+    if (event.preventDefault) {
+      event.preventDefault()
+    }
     const { isPaused } = this.props
     const key = event.key.toLowerCase()
     if (isPaused && event.keyCode === 27) {
@@ -147,73 +150,89 @@ class TetrisMap extends React.Component {
     }
 
     return (
-      <div style={{ height: `${window.outerHeight - 150}px` }} className="wrap-content">
-        <div style={{ height: `${window.outerHeight - 300}px` }} className="cell-content">
-          <svg width={`${window.outerHeight / 30 * COL}px`}
-               height={`${window.outerHeight / 30 * ROW}px`}
-               style={{ border: 'solid #7A8382 1px', filter: isGameOver ? 'blur(3px)' : 'none' }}
-          > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
-            {tetrisMap.map((s, row) =>
-              <g key={row}>
-                {s.map((c, col) => {
-                  const { x, y } = indexToCoordinate(row, col)
-                  const t = tetrisMap.get(row).get(col)
-                  return (
-                    <Cell key={col} x={x} y={y}
-                          fill={colorMap.get(t).color} real={true} />
-                  )
-                })}
-              </g>
-            )}
-            <g>
-              {directionMapDelta.get(type).get(direction).map((every, index) => {
-                const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
-                return (
-                  <Cell key={index} x={x} y={y} fill={color} real={true} />
-                )
-              })}
-            </g>
-            {helpSchemaOn ? forecastRender : null}
-          </svg>
-          {isGameOver ? <div className="game-over-wrapper">
-            <GameOverPage />
-          </div> : null}
-
+      <div className="all-content">
+        <div className="text-content">
+          <span>操作说明</span>
+          <img
+            src="/app/static/control.png"
+            alt="control"
+          />
         </div>
-        <div className="right-content">
-          <div className="score-content">
-            {/*<h2>Level: {speed}</h2>*/}
-            <div className="part">
-              <span>Score</span>
-              <div className="score">{score}</div>
-            </div>
-            <div className="part">
-              <span>Level</span>
-              <div className="score">{level}</div>
-            </div>
-          </div>
-          <div className="next-content">
-            <h3>Next</h3>
-            <div>
-              <svg
-                width={`${CELL_WIDTH * (maxCol - minCol + 1)}px`}
-                height={`${CELL_HEIGHT * (maxRow - minRow + 1 === 1 ? 2 : maxRow - minRow + 1)}px`}>
-                <g>
-                  {delta.map((every, index) => {
-                    const { x, y } = indexToCoordinate(every[0] - minRow, every[1] - minCol)
+        <div
+          style={{
+            height: `${window.outerHeight - 150}px`,
+          }}
+          className="wrap-content"
+        >
+          <div style={{
+            height: `${window.outerHeight - 300}px`, filter: isGameOver ? 'blur(3px)' : 'none'
+          }} className="cell-content">
+            <svg width={`${window.outerHeight / 30 * COL}px`}
+                 height={`${window.outerHeight / 30 * ROW}px`}
+                 style={{ border: 'solid #7A8382 1px' }}
+            > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+              {tetrisMap.map((s, row) =>
+                <g key={row}>
+                  {s.map((c, col) => {
+                    const { x, y } = indexToCoordinate(row, col)
+                    const t = tetrisMap.get(row).get(col)
                     return (
-                      <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
+                      <Cell key={col} x={x} y={y}
+                            fill={colorMap.get(t).color} real={true} />
                     )
                   })}
                 </g>
-              </svg>
+              )}
+              <g>
+                {directionMapDelta.get(type).get(direction).map((every, index) => {
+                  const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
+                  return (
+                    <Cell key={index} x={x} y={y} fill={color} real={true} />
+                  )
+                })}
+              </g>
+              {helpSchemaOn ? forecastRender : null}
+            </svg>
+          </div>
+          <div className="right-content" style={{
+            filter: isGameOver ? 'blur(3px)' : 'none'
+          }}>
+            <div className="score-content">
+              {/*<h2>Level: {speed}</h2>*/}
+              <div className="part">
+                <span>Score</span>
+                <div className="score">{score}</div>
+              </div>
+              <div className="part">
+                <span>Level</span>
+                <div className="score">{level}</div>
+              </div>
+            </div>
+            <div className="next-content">
+              <span>Next</span>
+              <div style={{ padding: '16px' }}>
+                <svg
+                  width={`${CELL_WIDTH * (maxCol - minCol + 1)}px`}
+                  height={`${CELL_HEIGHT * (maxRow - minRow + 1 === 1 ? 2 : maxRow - minRow + 1)}px`}>
+                  <g>
+                    {delta.map((every, index) => {
+                      const { x, y } = indexToCoordinate(every[0] - minRow, every[1] - minCol)
+                      return (
+                        <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
+                      )
+                    })}
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div className="button-content">
+              {isPaused ? startButton : pauseButton}
+              {helpSchemaOn ? helpDown : helpOn}
             </div>
           </div>
-          <div className="button-content"
-               style={{ display: 'flex', marginLeft: '40px', alignItems: 'center' }}>
-            {isPaused ? startButton : pauseButton}
-            {helpSchemaOn ? helpDown : helpOn}
-          </div>
+          {isGameOver ? <div className="game-over-wrapper">
+            <GameOverPage />
+          </div> : null}
         </div>
       </div>
     )
