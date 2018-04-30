@@ -2,12 +2,16 @@
   display flex
   overflow hidden
   .text-content
+    position relative
     display flex
     flex-direction column
     margin 0 20px 0 20px
     padding 10px
     border dotted #dcdcd2 3px
-    > span
+    .image
+      padding 10px
+      border dotted #dcdcd2 3px
+    .header-content
       display flex
       justify-content center
       align-items center
@@ -41,6 +45,7 @@
       display flex
       flex-direction column
       justify-content start
+      height 100%
       .score-content
         margin-left 50px
         margin-bottom 20px

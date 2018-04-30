@@ -19,7 +19,7 @@ export function canTetrominoMove(TerisMap, nextState) {
   const minCol = colDeltaList.min()
   const maxCol = colDeltaList.max()
   if (col + minCol < 0 || col + maxCol > COL - 1 || row + maxRow > ROW - 1) {
-    console.log('到边界了，无法移动')
+    // console.log('到边界了，无法移动')
     return false
   }
   return !delta.some(([dRow, dCol]) => row + dRow >= 0 && TerisMap.get(row + dRow).get(col + dCol) !== 'X')

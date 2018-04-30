@@ -23,6 +23,7 @@ export default function* rootSaga() {
   yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
+  yield takeEvery(A.CHANGE_SPEED, changeSpeed)
   yield fork(watchGameStatus)
 }
 
@@ -126,8 +127,8 @@ function* moveTetromino({ dRow, dCol }) {
   // 如果物块刚出来就发现不能继续移动，Game Over!
   // todo 还存在一些问题
   if (!canMove && row < 0 && dRow === 1) {
-    console.log('canMove:', canMove)
-    console.log('row', row)
+    // console.log('canMove:', canMove)
+    // console.log('row', row)
     // debugger
     yield put({ type: A.GAME_OVER })
   } else {
@@ -225,7 +226,7 @@ function* clearLines() {
     }
   })
   if (result !== 0) {
-    console.log('clear-lines')
+    // console.log('clear-lines')
     yield put({
       type: A.UPDATE_MAP,
       newMap
@@ -234,19 +235,23 @@ function* clearLines() {
       type: A.UPDATE_SCORE,
       getScore: scoreRule.get(result - 1),
     })
-    if (level < ((score + scoreRule.get(result - 1)) / 1000) + 1) {
-      yield put({
-        type: A.UPDATE_SPEED,
-        speed: (level + 1),
-      })
-      yield put({
-        type: A.UPDATE_LEVEL,
-      })
+    yield put({
+      type: A.CHANGE_SPEED,
+    })
+  }
+}
 
-    }
-    // yield put({
-    //   type: A.CHANGE_SPEED,
-    // })
+function* changeSpeed() {
+  const state = yield select()
+  const { score, level, speed } = state.toObject()
+  if (level < Math.floor(score / 1000) + 1) {
+    yield put({
+      type: A.UPDATE_SPEED,
+      speed: (level + 1),
+    })
+    yield put({
+      type: A.UPDATE_LEVEL,
+    })
   }
 }
 

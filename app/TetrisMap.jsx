@@ -15,16 +15,10 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 设置按钮（提示的出现和旋转的选择）
-// todo 旋转问题以及显示下一物块的问题
 // todo 样式的重复使用
-// todo 暂停时候还可以旋转的问题
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
-// todo 5、功能键的设置与设计
-// todo 游戏样式
-// todo 掉落预览
 // todo 自动增加难度
-// todo 游戏设置，如旋转方向等
+// todo 游戏得分的设计与实现
 
 React.createElement()
 
@@ -152,15 +146,17 @@ class TetrisMap extends React.Component {
     return (
       <div className="all-content">
         <div className="text-content">
-          <span>操作说明</span>
+          <span className="header-content">操作说明</span>
           <img
+            className="image"
             src="/app/static/control.png"
             alt="control"
           />
+          {/*<span className="header-content" style={{ marginTop: '300px' }} />*/}
         </div>
         <div
           style={{
-            height: `${window.outerHeight - 150}px`,
+            height: `${window.outerHeight - 200}px`,
           }}
           className="wrap-content"
         >
@@ -170,7 +166,7 @@ class TetrisMap extends React.Component {
             <svg width={`${window.outerHeight / 30 * COL}px`}
                  height={`${window.outerHeight / 30 * ROW}px`}
                  style={{ border: 'solid #7A8382 1px' }}
-            > /* 1、为什么在这里不设置width和height的话，内部元素无法直接撑起父元素的高度 2、设置height="100%"为什么不起作用 */
+            >
               {tetrisMap.map((s, row) =>
                 <g key={row}>
                   {s.map((c, col) => {
@@ -195,6 +191,7 @@ class TetrisMap extends React.Component {
             </svg>
           </div>
           <div className="right-content" style={{
+            height: `${window.outerHeight / 30 * ROW}px`,
             filter: isGameOver ? 'blur(3px)' : 'none'
           }}>
             <div className="score-content">
