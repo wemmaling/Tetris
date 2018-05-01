@@ -14,7 +14,7 @@ export default class Button extends React.Component {
         className="button"
         onClick={disabled ? null : onClick}
       >
-        {text}
+        <span>{text}</span>
       </div>
     )
   }

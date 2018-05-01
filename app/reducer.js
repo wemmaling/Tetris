@@ -17,6 +17,7 @@ const initialState = Map({
   speed: 1,
   // 游戏是否结束
   isGameOver: false,
+  isGoing: false,
   // 游戏是否暂停
   isPaused: false,
   // 帮助模式
@@ -44,7 +45,7 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.START) {
     return state.set('isPaused', false)
   } else if (action.type === A.RESTART) {
-    return initialState
+    return initialState.set('curTetromino', dropRandom()).set('nextTetromino', dropRandom())
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
   } else if (action.type === A.HELP_ON) {

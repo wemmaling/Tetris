@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import GameOverPage from 'GameOverPage'
+import StartPage from './StartPage'
+import PausedPage from './PausedPage'
 import Button from 'Button'
 import Cell from 'Cell'
 import { indexToCoordinate } from 'utils'
@@ -15,6 +17,7 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
+// todo 初始状态并没有随机
 // todo 样式的重复使用
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 自动增加难度
@@ -227,9 +230,13 @@ class TetrisMap extends React.Component {
               {helpSchemaOn ? helpDown : helpOn}
             </div>
           </div>
-          {isGameOver ? <div className="game-over-wrapper">
-            <GameOverPage />
-          </div> : null}
+          {isGameOver || isPaused ?
+            <div className="pop-wrapper">
+              {isGameOver ? <GameOverPage /> : null}
+              {/*{isPaused ? <PausedPage /> : null}*/}
+              {isPaused ? <PausedPage /> : null}
+            </div> : null}
+
         </div>
       </div>
     )
