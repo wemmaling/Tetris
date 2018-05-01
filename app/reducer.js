@@ -22,6 +22,7 @@ const initialState = Map({
   isPaused: false,
   // 帮助模式
   helpSchemaOn: false,
+  rorateDir: -1,
 })
 
 export default function updateMap(state = initialState, action) {
@@ -42,10 +43,10 @@ export default function updateMap(state = initialState, action) {
     return state.set('nextTetromino', action.next)
   } else if (action.type === A.PAUSE) {
     return state.set('isPaused', true)
-  } else if (action.type === A.START) {
+  } else if (action.type === A.CONTINUE) {
     return state.set('isPaused', false)
   } else if (action.type === A.RESTART) {
-    return initialState.set('curTetromino', dropRandom()).set('nextTetromino', dropRandom())
+    return initialState.set('curTetromino', dropRandom()).set('nextTetromino', dropRandom()).set('isGoing', true)
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
   } else if (action.type === A.HELP_ON) {
@@ -54,7 +55,9 @@ export default function updateMap(state = initialState, action) {
     return state.set('helpSchemaOn', false)
   } else if (action.type === A.UPDATE_LEVEL) {
     return state.update('level', v => v + 1)
-  } else {
+  } else if(action.type === A.CHANGE_RORATE_DIR) {
+    return state.update('rorateDir', v => -v)
+  }else {
     return state
   }
 }

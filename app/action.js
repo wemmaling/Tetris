@@ -29,7 +29,7 @@ export const DROP_DIRECTLY = 'DROP_DIRECTLY'
 // 重启游戏
 export const RESTART = 'RESTART'
 // 游戏开始
-export const START = 'START'
+export const CONTINUE = 'CONTINUE'
 export const PAUSE = 'PAUSE'
 export const UPDATE_GAME_STATUS = 'UPDATE_GAME_STATUS'
 export const UPDATE_FORECAST = 'UPDATE_FORECAST'
@@ -38,3 +38,5 @@ export const HELP_ON = 'HELP_ON'
 export const HELP_DOWN = 'HELP_DOWN'
 
 export const UPDATE_LEVEL = 'UPDATE_LEVEL'
+
+export const CHANGE_RORATE_DIR = 'CHANGE_RORATE_DIR'

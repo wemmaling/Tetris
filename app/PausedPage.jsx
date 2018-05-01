@@ -9,7 +9,7 @@ class PausedPage extends React.Component {
     const startButton = <Button
       disabled={false}
       onClick={() => {
-        this.props.dispatch({ type: A.START })
+        this.props.dispatch({ type: A.CONTINUE })
       }}
       text="继续"
     />
@@ -20,7 +20,7 @@ class PausedPage extends React.Component {
       <div className="line">
         <span>PAUSED</span>
         <div className="each-button">{startButton}</div>
-        <div className="each-button"><Button disabled={false} text="..." onClick={() => console.log('click')} /></div>
+        <div className="each-button"><Button disabled={false} text="···" onClick={() => console.log('click')} /></div>
         <div className="each-button">{reStartButton}</div>
       </div>
     )

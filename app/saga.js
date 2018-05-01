@@ -14,24 +14,27 @@ import { canTetrominoMove, dropRandom, forecastPosition } from './utils'
 import { COL } from './constants'
 
 export default function* rootSaga() {
+  yield takeEvery(A.RESTART, startGame)
+  yield fork(watchGameStatus)
+}
+
+function* startGame() {
   yield takeEvery(A.MOVE_TETROMINO, moveTetromino)
   yield takeEvery(A.MERGE_MAP, mergeMap)
   yield takeEvery(A.DROP_NEW_TETROMINO, dropNewTetromino)
   yield takeEvery(A.CLEAR_LINES, clearLines)
   yield takeEvery(A.RORATE, rorateTetromino)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
-  yield takeEvery(A.RESTART, restart)
+  // yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
   yield takeEvery(A.CHANGE_SPEED, changeSpeed)
-  yield fork(watchGameStatus)
 }
 
 
 function* watchGameStatus() {
   while (true) {
-    yield take(A.START)
-    // const updateLevel = yield fork(watchUpdateLevel)
+    yield take([A.CONTINUE, A.RESTART])
     const dropTask = yield fork(dropTetrominoLoop)
     const dropListenTask = yield fork(dropKeyUpAndDown)
     const lrListenTask = yield fork(lrKeyUpAndDown)
@@ -91,15 +94,13 @@ function* quickMoveLeftOrRight(dRow, dCol) {
       dRow,
       dCol,
     })
-    yield delay(150)
+    yield delay(100)
   }
 }
-
 
 // tetromino的自动下落
 function* dropTetrominoLoop() {
   while (true) {
-    // console.log('drop-loop')
     const state = yield select()
     // todo 对游戏结束的判定有点延迟，如果break的话重新开始就不会自动下落了
     // if (state.get('isGameOver')) {
@@ -148,16 +149,17 @@ function* moveTetromino({ dRow, dCol }) {
 
 function* changeTetromino({ next }) {
   const state = yield select()
-  const { tetrisMap } = state.toObject()
+  const { tetrisMap, helpSchemaOn } = state.toObject()
   yield put({
     type: A.UPDATE_TETROMINO,
     next,
   })
-  yield put({
-    type: A.UPDATE_FORECAST,
-    forecast: forecastPosition(tetrisMap, next)
-  })
-
+  if (helpSchemaOn) {
+    yield put({
+      type: A.UPDATE_FORECAST,
+      forecast: forecastPosition(tetrisMap, next)
+    })
+  }
 }
 
 // 控制物块的直接下落
@@ -247,7 +249,7 @@ function* changeSpeed() {
   if (level < Math.floor(score / 1000) + 1) {
     yield put({
       type: A.UPDATE_SPEED,
-      speed: (level + 1),
+      speed: (level + 1) * 0.5,
     })
     yield put({
       type: A.UPDATE_LEVEL,
@@ -282,8 +284,8 @@ function* dropNewTetromino() {
 function* rorateTetromino() {
   // console.log('rorate-tetromino')
   const state = yield select()
-  const { tetrisMap, curTetromino } = state.toObject()
-  const nextPosition = curTetromino.update('direction', v => (v - 1) % 4)
+  const { tetrisMap, curTetromino, rorateDir } = state.toObject()
+  const nextPosition = curTetromino.update('direction', v => (v + rorateDir) % 4)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   if (canMove && curTetromino.get('type') !== 'O') {
     yield put({
@@ -293,13 +295,9 @@ function* rorateTetromino() {
   }
 }
 
-function* restart() {
-  yield put({ type: A.START })
-}
-
 function* gameOver() {
   yield put({ type: A.UPDATE_GAME_STATUS })
-  yield put({ type: A.PAUSE })
+  // yield put({ type: A.PAUSE })
 }
 
 // function* watchUpdateLevel() {

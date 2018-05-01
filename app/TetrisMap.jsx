@@ -30,9 +30,10 @@ class TetrisMap extends React.Component {
   rorateKeyDown = false
   dropDirectly = false
   pauseKeyDown = false
+  changeRorateDir = false
 
   componentDidMount() {
-    this.props.dispatch({ type: A.START })
+    // this.props.dispatch({ type: A.CONTINUE })
     document.addEventListener('keydown', this.onKeyDown)
     document.addEventListener('keyup', this.onKeyUp)
   }
@@ -44,16 +45,19 @@ class TetrisMap extends React.Component {
 
   onKeyUp = (event) => {
     const key = event.key.toLowerCase()
-    if (key === 'a' || key === 'd') {
+    const keyCode = event.keyCode
+    if (key === 'a' || key === 'd' || keyCode === 37 || keyCode === 39) {
       this.props.dispatch({ type: A.LR_KEY_UP, keyName: key })
-    } else if (key === 's') {
+    } else if (key === 's' || keyCode === 40) {
       this.props.dispatch({ type: A.DROP_KEY_UP, keyName: key })
-    } else if (key === 'w') {
+    } else if (key === 'w' || keyCode === 38) {
       this.rorateKeyDown = false
-    } else if (event.keyCode === 32) {
+    } else if (keyCode === 32) {
       this.dropDirectly = false
-    } else if (event.keyCode === 27) {
+    } else if (keyCode === 27) {
       this.pauseKeyDown = false
+    } else if (key === 'z') {
+      this.changeRorateDir = false
     }
   }
 
@@ -63,25 +67,30 @@ class TetrisMap extends React.Component {
     }
     const { isPaused } = this.props
     const key = event.key.toLowerCase()
+    const keyCode = event.keyCode
     if (isPaused && event.keyCode === 27) {
-      this.props.dispatch({ type: A.START })
+      this.props.dispatch({ type: A.CONTINUE })
       this.pauseKeyDown = true
       return null
     }
     if (!isPaused) {
-      if (key === 'a') {
+      if (key === 'a' || keyCode === 37) {
         this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
-      } else if (key === 'd') {
+      } else if (key === 'd' || keyCode === 39) {
         this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
-      } else if (key === 's') {
+      } else if (key === 's' || keyCode === 40) {
         this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
-      } else if (key === 'w' && !this.rorateKeyDown) {
+      } else if ((key === 'w' || keyCode === 38) && !this.rorateKeyDown) {
         this.props.dispatch({ type: A.RORATE })
         this.rorateKeyDown = true
-      } else if (event.keyCode === 32 && !this.dropDirectly) {
+      } else if(key === 'z' && !this.changeRorateDir){
+        this.props.dispatch({type: A.CHANGE_RORATE_DIR})
+        this.changeRorateDir = true
+      }else if (keyCode === 32 && !this.dropDirectly) {
         this.props.dispatch({ type: A.DROP_DIRECTLY })
         this.dropDirectly = true
-      } else if (event.keyCode === 27) {
+      } else if (keyCode === 27 && !this.pauseKeyDown) {
+        // todo 长按esc存在问题
         this.props.dispatch({ type: A.PAUSE })
         this.pauseKeyDown = true
       }
@@ -89,7 +98,7 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn, isGoing } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
@@ -113,7 +122,7 @@ class TetrisMap extends React.Component {
     const startButton = <Button
       disabled={isGameOver}
       onClick={() => {
-        this.props.dispatch({ type: A.START })
+        this.props.dispatch({ type: A.CONTINUE })
       }}
       text="继续"
     />
@@ -136,14 +145,14 @@ class TetrisMap extends React.Component {
     let forecastRender = null
     if (forecast !== null) {
       const { type: fType, row: fRow, col: fCol, direction: fDirection } = forecast.toObject()
-      forecastRender = <g>
+      forecastRender = (isGoing && !isPaused) ? <g>
         {directionMapDelta.get(fType).get(fDirection).map((every, index) => {
           const { x, y } = indexToCoordinate(fRow + every[0], fCol + every[1])
           return (
             <Cell key={index} x={x} y={y} fill={color} real={false} />
           )
         })}
-      </g>
+      </g> : null
     }
 
     return (
@@ -182,14 +191,14 @@ class TetrisMap extends React.Component {
                   })}
                 </g>
               )}
-              <g>
+              {(isGoing && !isPaused) ? <g>
                 {directionMapDelta.get(type).get(direction).map((every, index) => {
                   const { x, y } = indexToCoordinate(tRow + every[0], tCol + every[1])
                   return (
                     <Cell key={index} x={x} y={y} fill={color} real={true} />
                   )
                 })}
-              </g>
+              </g> :null}
               {helpSchemaOn ? forecastRender : null}
             </svg>
           </div>
@@ -211,7 +220,7 @@ class TetrisMap extends React.Component {
             <div className="next-content">
               <span>Next</span>
               <div style={{ padding: '16px' }}>
-                <svg
+                {(isGoing && !isPaused) ? <svg
                   width={`${CELL_WIDTH * (maxCol - minCol + 1)}px`}
                   height={`${CELL_HEIGHT * (maxRow - minRow + 1 === 1 ? 2 : maxRow - minRow + 1)}px`}>
                   <g>
@@ -222,7 +231,7 @@ class TetrisMap extends React.Component {
                       )
                     })}
                   </g>
-                </svg>
+                </svg> : null}
               </div>
             </div>
             <div className="button-content">
@@ -230,6 +239,7 @@ class TetrisMap extends React.Component {
               {helpSchemaOn ? helpDown : helpOn}
             </div>
           </div>
+          {!isGoing ?  <div className="pop-wrapper"><StartPage /></div> : null}
           {isGameOver || isPaused ?
             <div className="pop-wrapper">
               {isGameOver ? <GameOverPage /> : null}

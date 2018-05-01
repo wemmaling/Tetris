@@ -15,6 +15,7 @@ class StartPage extends React.Component {
     />
     return (
       <div className="line">
+        <span>Emma's Tetris!</span>
         <div className="each-button">{startButton}</div>
         <div className="each-button"><Button disabled={false} text="..." onClick={() => console.log('click')} /></div>
       </div>
