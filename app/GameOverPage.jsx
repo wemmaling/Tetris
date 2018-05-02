@@ -9,9 +9,14 @@ class GameOverPage extends React.Component {
     const { score } = this.props
     return (
       <div className="game-over">
-        <h4>Your score</h4>
+        <div className="highest-score">
+          <span>HIGHEST SCORE</span>
+          <div className="score-board">{localStorage.getItem('highest-score')}</div>
+        </div>
+        <span>Your score</span>
         <div className="score">{score}</div>
-        <Button onClick={() => this.props.dispatch({ type: A.RESTART })} disabled={false} text="重新开始" />
+        <Button onClick={() => this.props.dispatch({ type: A.RESTART })} disabled={false}
+                text="重新开始" />
       </div>
     )
   }

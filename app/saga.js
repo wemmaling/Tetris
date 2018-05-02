@@ -14,8 +14,9 @@ import { canTetrominoMove, dropRandom, forecastPosition } from './utils'
 import { COL } from './constants'
 
 export default function* rootSaga() {
-  yield takeEvery(A.RESTART, startGame)
   yield fork(watchGameStatus)
+  yield take(A.RESTART)
+  yield fork(startGame)
 }
 
 function* startGame() {
@@ -296,6 +297,13 @@ function* rorateTetromino() {
 }
 
 function* gameOver() {
+  const state = yield select()
+  const oldScore = localStorage.getItem('highest-score')
+  if (oldScore == null) {
+    localStorage.setItem('highest-score', state.get('score'))
+  } else if (state.get('score') > oldScore) {
+    localStorage.setItem('highest-score', state.get('score'))
+  }
   yield put({ type: A.UPDATE_GAME_STATUS })
   // yield put({ type: A.PAUSE })
 }
