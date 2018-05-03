@@ -17,7 +17,6 @@ function mapStateToProps(state, ownProps) {
   return state.toObject()
 }
 
-// todo 初始状态并没有随机
 // todo 样式的重复使用
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 自动增加难度

@@ -219,7 +219,7 @@ function* mergeMap() {
 // 与背景板融合后判断是否有行满足消除的要求并更新Map
 function* clearLines() {
   const state = yield select()
-  const { tetrisMap, score, level, speed } = state.toObject()
+  const { tetrisMap } = state.toObject()
   let result = 0
   let newMap = tetrisMap
   tetrisMap.map((s, row) => {
@@ -229,7 +229,6 @@ function* clearLines() {
     }
   })
   if (result !== 0) {
-    // console.log('clear-lines')
     yield put({
       type: A.UPDATE_MAP,
       newMap
@@ -246,8 +245,8 @@ function* clearLines() {
 
 function* changeSpeed() {
   const state = yield select()
-  const { score, level, speed } = state.toObject()
-  if (level < Math.floor(score / 1000) + 1) {
+  const { score, level } = state.toObject()
+  if (score >= 1000 + level * (level + 1)  * 500) {
     yield put({
       type: A.UPDATE_SPEED,
       speed: (level + 1) * 0.5,
