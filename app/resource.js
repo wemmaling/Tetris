@@ -3,13 +3,13 @@ import { rorate } from 'utils'
 
 export const colorMap = Map({
   'X': { color: 'black' },
-  'Z': { color: '#FF0000' },
-  'J': { color: '#0000FF' },
-  'S': { color: '#00FF00' },
-  'O': { color: '#FFFF00' },
-  'L': { color: '#FF9900' },
-  'T': { color: '#9900FF' },
-  'I': { color: '#00FFFF' },
+  'Z': { color: '#fc6673' },
+  'J': { color: '#567eff' },
+  'S': { color: '#7dff8c' },
+  'O': { color: '#fffa72' },
+  'L': { color: '#ffb243' },
+  'T': { color: '#c787ff' },
+  'I': { color: '#7ffcff' },
 })
 
 // direction为0时的形状方向

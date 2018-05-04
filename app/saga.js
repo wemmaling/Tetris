@@ -30,6 +30,7 @@ function* startGame() {
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
   yield takeEvery(A.CHANGE_SPEED, changeSpeed)
+  yield takeEvery(A.HOLD_TETROMINO, holdTetromino)
 }
 
 
@@ -246,7 +247,7 @@ function* clearLines() {
 function* changeSpeed() {
   const state = yield select()
   const { score, level } = state.toObject()
-  if (score >= 1000 + level * (level + 1)  * 500) {
+  if (score >= 1000 + level * (level + 1) * 500) {
     yield put({
       type: A.UPDATE_SPEED,
       speed: (level + 1) * 0.5,
@@ -305,6 +306,12 @@ function* gameOver() {
   }
   yield put({ type: A.UPDATE_GAME_STATUS })
   // yield put({ type: A.PAUSE })
+}
+
+function* holdTetromino() {
+  const state = yield select()
+  const { curTetromino, hold } = state.toObject()
+  // todo
 }
 
 // function* watchUpdateLevel() {

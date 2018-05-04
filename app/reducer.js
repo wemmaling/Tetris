@@ -9,7 +9,9 @@ const initialState = Map({
   curTetromino: dropRandom(),
   nextTetromino: dropRandom(),
   forecast: null,
-  // 计算得分，每下落一个物块得10分，一次性消1行100分，2行200，3行400，4行800
+  // 临时存储块
+  hold: null,
+  // 计算得分，每下落一个物块得10分，一次性消1行100分，2行300，3行500，4行800
   score: 0,
   // 关卡
   level: 1,
@@ -49,15 +51,18 @@ export default function updateMap(state = initialState, action) {
     return initialState.set('curTetromino', dropRandom()).set('nextTetromino', dropRandom()).set('isGoing', true)
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
+  } else if (action.type === A.UPDATE_HOLD) {
+    // todo
+    return state.set('hold', null)
   } else if (action.type === A.HELP_ON) {
     return state.set('helpSchemaOn', true)
   } else if (action.type === A.HELP_DOWN) {
     return state.set('helpSchemaOn', false)
   } else if (action.type === A.UPDATE_LEVEL) {
     return state.update('level', v => v + 1)
-  } else if(action.type === A.CHANGE_RORATE_DIR) {
+  } else if (action.type === A.CHANGE_RORATE_DIR) {
     return state.update('rorateDir', v => -v)
-  }else {
+  } else {
     return state
   }
 }

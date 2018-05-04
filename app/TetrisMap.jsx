@@ -82,10 +82,10 @@ class TetrisMap extends React.Component {
       } else if ((key === 'w' || keyCode === 38) && !this.rorateKeyDown) {
         this.props.dispatch({ type: A.RORATE })
         this.rorateKeyDown = true
-      } else if(key === 'z' && !this.changeRorateDir){
-        this.props.dispatch({type: A.CHANGE_RORATE_DIR})
+      } else if (key === 'z' && !this.changeRorateDir) {
+        this.props.dispatch({ type: A.CHANGE_RORATE_DIR })
         this.changeRorateDir = true
-      }else if (keyCode === 32 && !this.dropDirectly) {
+      } else if (keyCode === 32 && !this.dropDirectly) {
         this.props.dispatch({ type: A.DROP_DIRECTLY })
         this.dropDirectly = true
       } else if (keyCode === 27 && !this.pauseKeyDown) {
@@ -97,19 +97,42 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn, isGoing } = this.props
+    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn, isGoing, hold } = this.props
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
-    const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color } = colorMap.get(type)
-    const { color: nextColor } = colorMap.get(nextType)
 
+    const { type: nextType, direction: nextDir } = nextTetromino.toObject()
+    const { color: nextColor } = colorMap.get(nextType)
     const delta = directionMapDelta.get(nextType).get(nextDir)
-    const colDeltaList = List(delta.map(every => every[1]))
-    const rowDeltaList = List(delta.map(every => every[0]))
-    const maxRow = rowDeltaList.max()
-    const minRow = rowDeltaList.min()
-    const minCol = colDeltaList.min()
-    const maxCol = colDeltaList.max()
+    const nextMaxRow = List(delta.map(every => every[0])).max()
+    const nextMinRow = List(delta.map(every => every[0])).min()
+    const nextMinCol = List(delta.map(every => every[1])).min()
+    const nextMaxCol = List(delta.map(every => every[1])).max()
+
+    let holdSvg = null
+
+    if (hold != null) {
+      const { type: holdType, direction: holdDir } = hold.toObject()
+      const { color: holdColor } = colorMap.get(holdType)
+      const holdDelta = directionMapDelta.get(holdType).get(holdDir)
+      const holdMaxRow = List(holdDelta.map(every => every[0])).max()
+      const holdMinRow = List(holdDelta.map(every => every[0])).min()
+      const holdMinCol = List(holdDelta.map(every => every[1])).min()
+      const holdMaxCol = List(holdDelta.map(every => every[1])).max()
+
+      holdSvg = <svg
+        width={`${CELL_WIDTH * (holdMaxCol - holdMinCol + 1)}px`}
+        height={`${CELL_HEIGHT * (holdMaxRow - holdMinRow + 1 === 1 ? 2 : holdMaxRow - holdMinRow + 1)}px`}>
+        <g>
+          {holdDelta.map((every, index) => {
+            const { x, y } = indexToCoordinate(every[0] - holdMinRow, every[1] - holdMinCol)
+            return (
+              <Cell key={index} x={x} y={y} fill={holdColor} real={true} />
+            )
+          })}
+        </g>
+      </svg>
+    }
 
     const pauseButton = <Button
       onClick={() => {
@@ -172,7 +195,7 @@ class TetrisMap extends React.Component {
           className="wrap-content"
         >
           <div style={{
-            height: `${window.outerHeight - 300}px`, filter: isGameOver ? 'blur(3px)' : 'none'
+            height: `${window.outerHeight - 300}px`
           }} className="cell-content">
             <svg width={`${window.outerHeight / 30 * COL}px`}
                  height={`${window.outerHeight / 30 * ROW}px`}
@@ -197,13 +220,12 @@ class TetrisMap extends React.Component {
                     <Cell key={index} x={x} y={y} fill={color} real={true} />
                   )
                 })}
-              </g> :null}
+              </g> : null}
               {helpSchemaOn ? forecastRender : null}
             </svg>
           </div>
           <div className="right-content" style={{
-            height: `${window.outerHeight / 30 * ROW}px`,
-            filter: isGameOver ? 'blur(3px)' : 'none'
+            height: `${window.outerHeight / 30 * ROW}px`
           }}>
             <div className="score-content">
               {/*<h2>Level: {speed}</h2>*/}
@@ -220,11 +242,11 @@ class TetrisMap extends React.Component {
               <span>Next</span>
               <div style={{ padding: '16px' }}>
                 {(isGoing && !isPaused) ? <svg
-                  width={`${CELL_WIDTH * (maxCol - minCol + 1)}px`}
-                  height={`${CELL_HEIGHT * (maxRow - minRow + 1 === 1 ? 2 : maxRow - minRow + 1)}px`}>
+                  width={`${CELL_WIDTH * (nextMaxCol - nextMinCol + 1)}px`}
+                  height={`${CELL_HEIGHT * (nextMaxRow - nextMinRow + 1 === 1 ? 2 : nextMaxRow - nextMinRow + 1)}px`}>
                   <g>
                     {delta.map((every, index) => {
-                      const { x, y } = indexToCoordinate(every[0] - minRow, every[1] - minCol)
+                      const { x, y } = indexToCoordinate(every[0] - nextMinRow, every[1] - nextMinCol)
                       return (
                         <Cell key={index} x={x} y={y} fill={nextColor} real={true} />
                       )
@@ -233,12 +255,18 @@ class TetrisMap extends React.Component {
                 </svg> : null}
               </div>
             </div>
+            <div className="next-content">
+              <span>Hold</span>
+              <div style={{ padding: '16px' }}>
+                {(isGoing && !isPaused) ? holdSvg : null}
+              </div>
+            </div>
             <div className="button-content">
               {isPaused ? startButton : pauseButton}
               {helpSchemaOn ? helpDown : helpOn}
             </div>
           </div>
-          {!isGoing ?  <div className="pop-wrapper"><StartPage /></div> : null}
+          {!isGoing ? <div className="pop-wrapper"><StartPage /></div> : null}
           {isGameOver || isPaused ?
             <div className="pop-wrapper">
               {isGameOver ? <GameOverPage /> : null}

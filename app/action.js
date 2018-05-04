@@ -40,3 +40,6 @@ export const HELP_DOWN = 'HELP_DOWN'
 export const UPDATE_LEVEL = 'UPDATE_LEVEL'
 
 export const CHANGE_RORATE_DIR = 'CHANGE_RORATE_DIR'
+
+export const HOLD_TETROMINO = 'HOLD_TETROMINO'
+export const UPDATE_HOLD = 'UPDATE_HOLD'
