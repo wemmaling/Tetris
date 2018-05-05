@@ -311,6 +311,23 @@ function* gameOver() {
 function* holdTetromino() {
   const state = yield select()
   const { curTetromino, hold } = state.toObject()
+  console.log(curTetromino.get('canBeHold'))
+  if (curTetromino.get('canBeHold')) {
+    yield put({
+      type: A.UPDATE_HOLD,
+      hold: curTetromino,
+    })
+    if (hold == null) {
+      yield put({
+        type: A.DROP_NEW_TETROMINO,
+      })
+    } else {
+      yield put({
+        type: A.CHANGE_TETROMINO,
+        next: hold,
+      })
+    }
+  }
   // todo
 }
 

@@ -52,8 +52,7 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
   } else if (action.type === A.UPDATE_HOLD) {
-    // todo
-    return state.set('hold', null)
+    return state.set('hold', action.hold).update('curTetromino', v => v.set('canBeHold', false))
   } else if (action.type === A.HELP_ON) {
     return state.set('helpSchemaOn', true)
   } else if (action.type === A.HELP_DOWN) {

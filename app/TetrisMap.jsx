@@ -30,6 +30,7 @@ class TetrisMap extends React.Component {
   dropDirectly = false
   pauseKeyDown = false
   changeRorateDir = false
+  hold = false
 
   componentDidMount() {
     // this.props.dispatch({ type: A.CONTINUE })
@@ -57,6 +58,8 @@ class TetrisMap extends React.Component {
       this.pauseKeyDown = false
     } else if (key === 'z') {
       this.changeRorateDir = false
+    } else if (key === 'c') {
+      this.hold = false
     }
   }
 
@@ -85,7 +88,10 @@ class TetrisMap extends React.Component {
       } else if (key === 'z' && !this.changeRorateDir) {
         this.props.dispatch({ type: A.CHANGE_RORATE_DIR })
         this.changeRorateDir = true
-      } else if (keyCode === 32 && !this.dropDirectly) {
+      } else if (key === 'c' && !this.hold) {
+        this.props.dispatch({ type: A.HOLD_TETROMINO })
+        this.hold = true
+      }else if (keyCode === 32 && !this.dropDirectly) {
         this.props.dispatch({ type: A.DROP_DIRECTLY })
         this.dropDirectly = true
       } else if (keyCode === 27 && !this.pauseKeyDown) {

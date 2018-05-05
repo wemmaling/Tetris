@@ -36,7 +36,7 @@ export function dropRandom() {
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
 
-  return Map({ type, row: -maxRow, col: 4, direction })
+  return Map({ type, row: -maxRow, col: 4, direction, canBeHold: true })
 }
 
 // 旋转坐标的变化
