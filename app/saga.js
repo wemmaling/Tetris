@@ -10,7 +10,7 @@ import { delay } from 'redux-saga'
 import { Map, Repeat } from 'immutable'
 import * as A from './action'
 import { scoreRule, directionMapDelta } from './resource'
-import { canTetrominoMove, dropRandom, forecastPosition } from './utils'
+import { canTetrominoMove, dropRandom, forecastPosition, convert } from './utils'
 import { COL } from './constants'
 
 export default function* rootSaga() {
@@ -311,20 +311,20 @@ function* gameOver() {
 function* holdTetromino() {
   const state = yield select()
   const { curTetromino, hold } = state.toObject()
-  console.log(curTetromino.get('canBeHold'))
   if (curTetromino.get('canBeHold')) {
     yield put({
       type: A.UPDATE_HOLD,
-      hold: curTetromino,
+      hold: curTetromino.get('type'),
     })
     if (hold == null) {
       yield put({
         type: A.DROP_NEW_TETROMINO,
       })
     } else {
+      const { row, col } = convert(hold)
       yield put({
         type: A.CHANGE_TETROMINO,
-        next: hold,
+        next: Map({ type: hold, row, col, direction: 0, canBeHold: false }),
       })
     }
   }

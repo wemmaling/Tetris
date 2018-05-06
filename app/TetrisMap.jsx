@@ -5,13 +5,11 @@ import StartPage from './StartPage'
 import PausedPage from './PausedPage'
 import Button from 'Button'
 import Cell from 'Cell'
-import { indexToCoordinate } from 'utils'
+import { indexToCoordinate, deltaMinAndMax } from 'utils'
 import * as A from 'action'
 import { colorMap, directionMapDelta } from 'resource'
 import { CELL_WIDTH, CELL_HEIGHT, COL, ROW } from './constants'
 import './style/TetrisMap.styl'
-import { List } from "immutable"
-
 
 function mapStateToProps(state, ownProps) {
   return state.toObject()
@@ -21,8 +19,6 @@ function mapStateToProps(state, ownProps) {
 // todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
 // todo 自动增加难度
 // todo 游戏得分的设计与实现
-
-React.createElement()
 
 class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量
@@ -64,9 +60,6 @@ class TetrisMap extends React.Component {
   }
 
   onKeyDown = (event) => {
-    if (event.preventDefault) {
-      event.preventDefault()
-    }
     const { isPaused } = this.props
     const key = event.key.toLowerCase()
     const keyCode = event.keyCode
@@ -91,7 +84,10 @@ class TetrisMap extends React.Component {
       } else if (key === 'c' && !this.hold) {
         this.props.dispatch({ type: A.HOLD_TETROMINO })
         this.hold = true
-      }else if (keyCode === 32 && !this.dropDirectly) {
+      } else if (keyCode === 32 && !this.dropDirectly) {
+        if (event.preventDefault) {
+          event.preventDefault()
+        }
         this.props.dispatch({ type: A.DROP_DIRECTLY })
         this.dropDirectly = true
       } else if (keyCode === 27 && !this.pauseKeyDown) {
@@ -103,28 +99,35 @@ class TetrisMap extends React.Component {
   }
 
   render() {
-    const { tetrisMap, curTetromino, score, isGameOver, nextTetromino, isPaused, level, forecast, helpSchemaOn, isGoing, hold } = this.props
+    const {
+      tetrisMap,
+      curTetromino,
+      score,
+      isGameOver,
+      nextTetromino,
+      isPaused,
+      level,
+      forecast,
+      helpSchemaOn,
+      isGoing,
+      hold: holdType,
+    } = this.props
+
     const { type, row: tRow, col: tCol, direction } = curTetromino.toObject()
     const { color } = colorMap.get(type)
 
     const { type: nextType, direction: nextDir } = nextTetromino.toObject()
     const { color: nextColor } = colorMap.get(nextType)
     const delta = directionMapDelta.get(nextType).get(nextDir)
-    const nextMaxRow = List(delta.map(every => every[0])).max()
-    const nextMinRow = List(delta.map(every => every[0])).min()
-    const nextMinCol = List(delta.map(every => every[1])).min()
-    const nextMaxCol = List(delta.map(every => every[1])).max()
+    const { maxR: nextMaxRow, maxC: nextMaxCol, minC: nextMinCol, minR: nextMinRow } = deltaMinAndMax(delta)
 
     let holdSvg = null
 
-    if (hold != null) {
-      const { type: holdType, direction: holdDir } = hold.toObject()
+    if (holdType != null) {
+      const holdDir = 0
       const { color: holdColor } = colorMap.get(holdType)
       const holdDelta = directionMapDelta.get(holdType).get(holdDir)
-      const holdMaxRow = List(holdDelta.map(every => every[0])).max()
-      const holdMinRow = List(holdDelta.map(every => every[0])).min()
-      const holdMinCol = List(holdDelta.map(every => every[1])).min()
-      const holdMaxCol = List(holdDelta.map(every => every[1])).max()
+      const { maxR: holdMaxRow, maxC: holdMaxCol, minC: holdMinCol, minR: holdMinRow } = deltaMinAndMax(holdDelta)
 
       holdSvg = <svg
         width={`${CELL_WIDTH * (holdMaxCol - holdMinCol + 1)}px`}

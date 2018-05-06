@@ -52,7 +52,7 @@ export default function updateMap(state = initialState, action) {
   } else if (action.type === A.UPDATE_FORECAST) {
     return state.set('forecast', action.forecast)
   } else if (action.type === A.UPDATE_HOLD) {
-    return state.set('hold', action.hold).update('curTetromino', v => v.set('canBeHold', false))
+    return state.set('hold', action.hold)
   } else if (action.type === A.HELP_ON) {
     return state.set('helpSchemaOn', true)
   } else if (action.type === A.HELP_DOWN) {

@@ -31,12 +31,27 @@ const keysArray = colorMap.keySeq().toList().delete(0).toArray()
 export function dropRandom() {
   const index = Math.floor(Math.random() * 7)
   const type = keysArray[index]
+  const {row, col} = convert(type)
+
+  return Map({ type, row, col, direction: 0, canBeHold: true })
+}
+
+export function convert(type) {
   const direction = 0
   const delta = directionMapDelta.get(type).get(direction)
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
+  return { row: -maxRow, col: 4 }
+}
 
-  return Map({ type, row: -maxRow, col: 4, direction, canBeHold: true })
+export function deltaMinAndMax(delta) {
+  const rowDelta = List(delta.map(every => every[0]))
+  const colDelta = List(delta.map(every => every[1]))
+  const maxR = rowDelta.max()
+  const minR = rowDelta.min()
+  const minC = colDelta.min()
+  const maxC = colDelta.max()
+  return { maxR, minR, maxC, minC }
 }
 
 // 旋转坐标的变化
