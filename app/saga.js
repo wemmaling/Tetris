@@ -51,20 +51,15 @@ function* watchGameStatus() {
 // 监听下键的按下与释放
 function* dropKeyUpAndDown() {
   while (true) {
-    const state = yield select()
-    const { isGameOver } = state.toObject()
-    if (isGameOver) {
-      break
-    }
     yield take(A.DROP_KEY_DOWN)
-    const newState = yield select()
-    const speed = newState.get('speed')
+    const state = yield select()
+    const speed = state.get('speed')
     yield put({
       type: A.UPDATE_SPEED,
       speed: 20 * speed,
     })
     const task = yield fork(dropTetrominoLoop)
-    yield take(A.DROP_KEY_UP)
+    yield take([A.DROP_KEY_UP, A.GAME_OVER])
     yield cancel(task)
     yield put({
       type: A.UPDATE_SPEED,
@@ -96,7 +91,7 @@ function* quickMoveLeftOrRight(dRow, dCol) {
       dRow,
       dCol,
     })
-    yield delay(100)
+    yield delay(130)
   }
 }
 
@@ -104,6 +99,7 @@ function* quickMoveLeftOrRight(dRow, dCol) {
 function* dropTetrominoLoop() {
   while (true) {
     const state = yield select()
+    const { speed, level } = state.toObject()
     // todo 对游戏结束的判定有点延迟，如果break的话重新开始就不会自动下落了
     // if (state.get('isGameOver')) {
     //   break
@@ -114,6 +110,12 @@ function* dropTetrominoLoop() {
         dRow: 1,
         dCol: 0,
       })
+      if (speed > (level + 1) * 0.5) {
+        yield put({
+          type: A.UPDATE_SCORE,
+          getScore: 1,
+        })
+      }
     }
     yield delay(1000 / state.get('speed'))
   }
@@ -130,9 +132,6 @@ function* moveTetromino({ dRow, dCol }) {
   // 如果物块刚出来就发现不能继续移动，Game Over!
   // todo 还存在一些问题
   if (!canMove && row < 0 && dRow === 1) {
-    // console.log('canMove:', canMove)
-    // console.log('row', row)
-    // debugger
     yield put({ type: A.GAME_OVER })
   } else {
     // 如果物块不能继续移动且游戏并没有结束，并且动作为向下移动，就合并背景
@@ -170,13 +169,13 @@ function* dropDirectly() {
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   if (!isGameOver) {
-    // let nextPosition = curTetromino
-    // while (canTetrominoMove(tetrisMap, nextPosition)) {
-    //   nextPosition = nextPosition.update('row', v => v + 1)
-    // }
     yield put({
       type: A.CHANGE_TETROMINO,
       next: forecastPosition(tetrisMap, curTetromino)
+    })
+    yield put({
+      type: A.UPDATE_SCORE,
+      getScore: 2 * (19 - curTetromino.get('row')),
     })
     yield put({ type: A.MERGE_MAP })
   }
@@ -197,8 +196,6 @@ function* mergeMap() {
       newMap = newMap.update(row + dRow, value => value.update(col + dCol, () => type))
     }
   }
-  // console.log(newMap.toJS())
-  // debugger
   // 如果游戏结束，则不继续掉落新的物块
   if (!isGameOver) {
     yield put({
@@ -209,8 +206,6 @@ function* mergeMap() {
     yield put({
       type: A.DROP_NEW_TETROMINO,
     })
-
-    // yield delay(1000)
     yield put({
       type: A.CLEAR_LINES,
     })
@@ -247,7 +242,7 @@ function* clearLines() {
 function* changeSpeed() {
   const state = yield select()
   const { score, level } = state.toObject()
-  if (score >= 1000 + level * (level + 1) * 500) {
+  if (score >= 1000 + level * (level - 1) * 500) {
     yield put({
       type: A.UPDATE_SPEED,
       speed: (level + 1) * 0.5,
@@ -273,12 +268,6 @@ function* dropNewTetromino() {
       next: dropRandom(),
     })
   }
-
-  // todo 掉落暂不计分
-  // yield put({
-  //   type: A.UPDATE_SCORE,
-  //   getScore: 10,
-  // })
 }
 
 // 旋转
@@ -305,7 +294,6 @@ function* gameOver() {
     localStorage.setItem('highest-score', state.get('score'))
   }
   yield put({ type: A.UPDATE_GAME_STATUS })
-  // yield put({ type: A.PAUSE })
 }
 
 function* holdTetromino() {
@@ -330,20 +318,3 @@ function* holdTetromino() {
   }
   // todo
 }
-
-// function* watchUpdateLevel() {
-//   while (true) {
-//     const state = yield select()
-//     const { score, level } = state.toObject()
-//     if (level < (score / 100) + 1) {
-//       yield put({
-//         type: A.UPDATE_LEVEL,
-//       })
-//       yield put({
-//         type: A.UPDATE_SPEED,
-//         speed: level + 1,
-//       })
-//     }
-//     yield delay()
-//   }
-// }

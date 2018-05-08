@@ -74,7 +74,10 @@ class TetrisMap extends React.Component {
       } else if (key === 'd' || keyCode === 39) {
         this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
       } else if (key === 's' || keyCode === 40) {
-        this.props.dispatch({ type: A.DROP_KEY_DOWN, dRow: 1, dCol: 0 })
+        if (event.preventDefault) {
+          event.preventDefault()
+        }
+        this.props.dispatch({ type: A.DROP_KEY_DOWN })
       } else if ((key === 'w' || keyCode === 38) && !this.rorateKeyDown) {
         this.props.dispatch({ type: A.RORATE })
         this.rorateKeyDown = true
