@@ -6,18 +6,13 @@ import { connect } from 'react-redux'
 
 class StartPage extends React.Component {
   render() {
-    const startButton = <Button
-      disabled={false}
-      onClick={() => {
-        this.props.dispatch({ type: A.RESTART })
-      }}
-      text="开始游戏"
-    />
+    const startButton = <Button disabled={false} clickAction={A.RESTART} text="开始游戏" />
     return (
       <div className="line">
         <span>Emma's Tetris!</span>
         <div className="each-button">{startButton}</div>
-        <div className="each-button"><Button disabled={false} text="..." onClick={() => console.log('click')} /></div>
+        <div className="each-button"><Button disabled={false} text="..."
+                                             onClick={() => console.log('click')} /></div>
       </div>
     )
   }

@@ -41,6 +41,7 @@ export function convert(type) {
   const delta = directionMapDelta.get(type).get(direction)
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
+  const minRow = rowDeltaList.min()
   return { row: -maxRow, col: 4 }
 }
 

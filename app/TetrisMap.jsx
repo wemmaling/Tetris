@@ -146,35 +146,11 @@ class TetrisMap extends React.Component {
       </svg>
     }
 
-    const pauseButton = <Button
-      onClick={() => {
-        this.props.dispatch({ type: A.PAUSE })
-      }}
-      text="暂停"
-      disabled={isGameOver}
-    />
-    const startButton = <Button
-      disabled={isGameOver}
-      onClick={() => {
-        this.props.dispatch({ type: A.CONTINUE })
-      }}
-      text="继续"
-    />
+    const pauseButton = <Button clickAction={A.PAUSE} text="暂停" disabled={isGameOver} />
+    const startButton = <Button clickAction={A.CONTINUE} text="继续" disabled={isGameOver} />
 
-    const helpOn = <Button
-      onClick={() => {
-        this.props.dispatch({ type: A.HELP_ON })
-      }}
-      text="简易模式"
-      disabled={isGameOver}
-    />
-    const helpDown = <Button
-      disabled={isGameOver}
-      onClick={() => {
-        this.props.dispatch({ type: A.HELP_DOWN })
-      }}
-      text="正常模式"
-    />
+    const helpOn = <Button clickAction={A.HELP_ON} text="简易模式" disabled={isGameOver} />
+    const helpDown = <Button clickAction={A.HELP_DOWN} text="正常模式" disabled={isGameOver} />
 
     let forecastRender = null
     if (forecast !== null) {
@@ -285,7 +261,6 @@ class TetrisMap extends React.Component {
               {/*{isPaused ? <PausedPage /> : null}*/}
               {isPaused ? <PausedPage /> : null}
             </div> : null}
-
         </div>
       </div>
     )

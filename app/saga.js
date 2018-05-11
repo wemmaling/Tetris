@@ -1,10 +1,11 @@
 import {
-  cancel,
   put,
   fork,
   takeEvery,
   select,
-  take
+  take,
+  race,
+  call
 } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 import { Map, Repeat } from 'immutable'
@@ -26,7 +27,6 @@ function* startGame() {
   yield takeEvery(A.CLEAR_LINES, clearLines)
   yield takeEvery(A.RORATE, rorateTetromino)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
-  // yield takeEvery(A.RESTART, restart)
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
   yield takeEvery(A.CHANGE_SPEED, changeSpeed)
@@ -37,14 +37,15 @@ function* startGame() {
 function* watchGameStatus() {
   while (true) {
     yield take([A.CONTINUE, A.RESTART])
-    const dropTask = yield fork(dropTetrominoLoop)
-    const dropListenTask = yield fork(dropKeyUpAndDown)
-    const lrListenTask = yield fork(lrKeyUpAndDown)
-    yield take(A.PAUSE)
-    yield cancel(dropTask)
-    yield cancel(dropListenTask)
-    yield cancel(lrListenTask)
-    // yield cancel(updateLevel)
+    yield race([
+      // 物块自动下落
+      call(dropTetrominoLoop),
+      // 监听下键的按下与释放
+      call(dropKeyUpAndDown),
+      // 监听左右按键的按下与释放
+      call(lrKeyUpAndDown),
+      take([A.PAUSE, A.GAME_OVER]),
+    ])
   }
 }
 
@@ -58,9 +59,10 @@ function* dropKeyUpAndDown() {
       type: A.UPDATE_SPEED,
       speed: 20 * speed,
     })
-    const task = yield fork(dropTetrominoLoop)
-    yield take([A.DROP_KEY_UP, A.GAME_OVER])
-    yield cancel(task)
+    yield race([
+      call(dropTetrominoLoop),
+      take([A.DROP_KEY_UP, A.GAME_OVER]),
+    ])
     yield put({
       type: A.UPDATE_SPEED,
       speed: speed,
@@ -77,9 +79,10 @@ function* lrKeyUpAndDown() {
     }
     const action = yield take(A.LR_KEY_DOWN)
     const { dRow, dCol } = action
-    const task = yield fork(quickMoveLeftOrRight, dRow, dCol)
-    yield take(A.LR_KEY_UP)
-    yield cancel(task)
+    yield race([
+      call(quickMoveLeftOrRight, dRow, dCol),
+      take(A.LR_KEY_UP),
+    ])
   }
 }
 
@@ -185,7 +188,7 @@ function* dropDirectly() {
 function* mergeMap() {
   // console.log('merge-map')
   const state = yield select()
-  const { tetrisMap, curTetromino, isGameOver, score, level } = state.toObject()
+  const { tetrisMap, curTetromino, isGameOver } = state.toObject()
   const { type, row, col, direction } = curTetromino.toObject()
   const delta = directionMapDelta.get(type).get(direction)
   let newMap = tetrisMap
