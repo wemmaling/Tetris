@@ -16,9 +16,6 @@ function mapStateToProps(state, ownProps) {
 }
 
 // todo 样式的重复使用
-// todo 2、判断游戏是否结束时好像还存在一些小bug(抓狂)
-// todo 自动增加难度
-// todo 游戏得分的设计与实现
 
 class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量

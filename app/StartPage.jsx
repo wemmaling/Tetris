@@ -1,6 +1,6 @@
 import React from 'react'
 import Button from './Button'
-import './style/pausePage.styl'
+import './style/popPage.styl'
 import * as A from './action'
 import { connect } from 'react-redux'
 

@@ -16,30 +16,24 @@ import { COL } from './constants'
 
 export default function* rootSaga() {
   yield fork(watchGameStatus)
-  yield take(A.RESTART)
-  yield fork(startGame)
-}
-
-function* startGame() {
-  yield takeEvery(A.MOVE_TETROMINO, moveTetromino)
+  yield takeEvery(A.MOVE_TETROMINO, move)
   yield takeEvery(A.MERGE_MAP, mergeMap)
-  yield takeEvery(A.DROP_NEW_TETROMINO, dropNewTetromino)
+  yield takeEvery(A.DROP_NEW_TETROMINO, dropNewOne)
   yield takeEvery(A.CLEAR_LINES, clearLines)
-  yield takeEvery(A.RORATE, rorateTetromino)
+  yield takeEvery(A.RORATE, rorate)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield takeEvery(A.GAME_OVER, gameOver)
   yield takeEvery(A.CHANGE_TETROMINO, changeTetromino)
   yield takeEvery(A.CHANGE_SPEED, changeSpeed)
-  yield takeEvery(A.HOLD_TETROMINO, holdTetromino)
+  yield takeEvery(A.HOLD_TETROMINO, hold)
 }
-
 
 function* watchGameStatus() {
   while (true) {
     yield take([A.CONTINUE, A.RESTART])
     yield race([
       // 物块自动下落
-      call(dropTetrominoLoop),
+      call(dropLoop),
       // 监听下键的按下与释放
       call(dropKeyUpAndDown),
       // 监听左右按键的按下与释放
@@ -60,7 +54,7 @@ function* dropKeyUpAndDown() {
       speed: 20 * speed,
     })
     yield race([
-      call(dropTetrominoLoop),
+      call(dropLoop),
       take([A.DROP_KEY_UP, A.GAME_OVER]),
     ])
     yield put({
@@ -80,14 +74,14 @@ function* lrKeyUpAndDown() {
     const action = yield take(A.LR_KEY_DOWN)
     const { dRow, dCol } = action
     yield race([
-      call(quickMoveLeftOrRight, dRow, dCol),
+      call(moveLeftOrRight, dRow, dCol),
       take(A.LR_KEY_UP),
     ])
   }
 }
 
 // 加速左右移动
-function* quickMoveLeftOrRight(dRow, dCol) {
+function* moveLeftOrRight(dRow, dCol) {
   while (true) {
     yield put({
       type: A.MOVE_TETROMINO,
@@ -99,14 +93,10 @@ function* quickMoveLeftOrRight(dRow, dCol) {
 }
 
 // tetromino的自动下落
-function* dropTetrominoLoop() {
+function* dropLoop() {
   while (true) {
     const state = yield select()
     const { speed, level } = state.toObject()
-    // todo 对游戏结束的判定有点延迟，如果break的话重新开始就不会自动下落了
-    // if (state.get('isGameOver')) {
-    //   break
-    // }
     if (!state.get('isGameOver')) {
       yield put({
         type: A.MOVE_TETROMINO,
@@ -125,7 +115,7 @@ function* dropTetrominoLoop() {
 }
 
 // 通过键盘控制tetromino的移动
-function* moveTetromino({ dRow, dCol }) {
+function* move({ dRow, dCol }) {
   // console.log('move-tetromino')
   const state = yield select()
   const { tetrisMap, curTetromino, isGameOver } = state.toObject()
@@ -257,7 +247,7 @@ function* changeSpeed() {
 }
 
 // 掉落新的tetromino
-function* dropNewTetromino() {
+function* dropNewOne() {
   // console.log('drop-new-tetromino')
   const state = yield select()
   const { isGameOver, nextTetromino } = state.toObject()
@@ -274,7 +264,7 @@ function* dropNewTetromino() {
 }
 
 // 旋转
-function* rorateTetromino() {
+function* rorate() {
   // console.log('rorate-tetromino')
   const state = yield select()
   const { tetrisMap, curTetromino, rorateDir } = state.toObject()
@@ -299,7 +289,7 @@ function* gameOver() {
   yield put({ type: A.UPDATE_GAME_STATUS })
 }
 
-function* holdTetromino() {
+function* hold() {
   const state = yield select()
   const { curTetromino, hold } = state.toObject()
   if (curTetromino.get('canBeHold')) {
@@ -319,5 +309,4 @@ function* holdTetromino() {
       })
     }
   }
-  // todo
 }

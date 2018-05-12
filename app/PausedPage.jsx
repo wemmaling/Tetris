@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Button from './Button'
-import './style/pausePage.styl'
+import './style/popPage.styl'
 import * as A from './action'
 
 class PausedPage extends React.Component {
@@ -15,7 +15,7 @@ class PausedPage extends React.Component {
         <span>PAUSED</span>
         <div className="each-button">{startButton}</div>
         <div className="each-button"><Button disabled={false} text="···"
-                                             onClick={() => console.log('click')} /></div>
+                                             onClick={null} /></div>
         <div className="each-button">{reStartButton}</div>
       </div>
     )
