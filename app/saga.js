@@ -75,7 +75,7 @@ function* lrKeyUpAndDown() {
     const { dRow, dCol } = action
     yield race([
       call(moveLeftOrRight, dRow, dCol),
-      take(A.LR_KEY_UP),
+      take([A.LR_KEY_UP, A.GAME_OVER]),
     ])
   }
 }
