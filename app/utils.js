@@ -41,7 +41,6 @@ export function convert(type) {
   const delta = directionMapDelta.get(type).get(direction)
   const rowDeltaList = List(delta.map(every => every[0]))
   const maxRow = rowDeltaList.max()
-  const minRow = rowDeltaList.min()
   return { row: -maxRow, col: 4 }
 }
 
@@ -67,4 +66,16 @@ export function forecastPosition(tetrisMap, curTetromino) {
     nextPosition = nextPosition.update('row', v => v + 1)
   }
   return nextPosition.update('row', v => v - 1)
+}
+
+// export function getLevelByScore(score) {
+//
+// }
+
+export function getSpeedByLevel(level, isFastDropping = false) {
+  if (isFastDropping) {
+    return (level + 1) * 10 * level
+  } else {
+    return (level + 1) * 0.5
+  }
 }

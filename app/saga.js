@@ -2,7 +2,6 @@ import {
   put,
   fork,
   takeEvery,
-  takeLatest,
   select,
   take,
   race,
@@ -12,8 +11,14 @@ import { delay } from 'redux-saga'
 import { Map, Repeat } from 'immutable'
 import * as A from './action'
 import { scoreRule, directionMapDelta } from './resource'
-import { canTetrominoMove, dropRandom, forecastPosition, convert } from './utils'
+import { canTetrominoMove, dropRandom, forecastPosition, convert, getSpeedByLevel } from './utils'
 import { COL } from './constants'
+
+let isFastDropping = false
+let rorateKeyDown = false
+let dropDown = false
+let changeRorateDir = false
+let hold = false
 
 export default function* rootSaga() {
   yield fork(watchGameStatus)
@@ -21,14 +26,14 @@ export default function* rootSaga() {
 }
 
 function* watchGameStatus() {
-  yield takeLatest(A.UPDATE_SPEED, dropLoop)
-  yield put({ type: A.UPDATE_SPEED, speed: 1 })
-
   while (true) {
     yield take([A.CONTINUE, A.RESTART])
+    // yield takeLatest(A.UPDATE_SPEED, dropLoop)
+    // yield put({ type: A.UPDATE_SPEED, speed: 1 })
     yield race([
       gameActions(),
       // 物块自动下落
+      call(dropLoop),
       // 监听下键的按下与释放
       call(dropKeyUpAndDown),
       // 监听左右按键的按下与释放
@@ -42,26 +47,20 @@ function* gameActions() {
   yield takeEvery(A.RORATE, rorate)
   yield takeEvery(A.DROP_DIRECTLY, dropDirectly)
   yield takeEvery(A.HOLD_TETROMINO, handleHold)
+  yield takeEvery(A.KEY_DOWN, keyDown)
+  yield takeEvery(A.KEY_UP, keyUp)
 }
 
 // 监听下键的按下与释放
 function* dropKeyUpAndDown() {
   while (true) {
     yield take(A.DROP_KEY_DOWN)
-    const state = yield select()
-    const speed = state.get('speed')
-    yield put({
-      type: A.UPDATE_SPEED,
-      speed: 20 * speed,
-    })
-    // yield race([
-    //   call(dropLoop, 'dropKeyUpAndDown'),
-    yield take([A.DROP_KEY_UP, A.GAME_OVER])
-    // ])
-    yield put({
-      type: A.UPDATE_SPEED,
-      speed: speed,
-    })
+    isFastDropping = true
+    yield race([
+      call(dropLoop),
+      take([A.DROP_KEY_UP, A.GAME_OVER]),
+    ])
+    isFastDropping = false
   }
 }
 
@@ -80,7 +79,7 @@ function* lrKeyUpAndDown() {
 // 加速左右移动
 function* moveLeftOrRight(dRow, dCol) {
   while (true) {
-    yield move({ dRow, dCol })
+    yield move(dRow, dCol)
     yield delay(130)
   }
 }
@@ -89,9 +88,10 @@ function* moveLeftOrRight(dRow, dCol) {
 function* dropLoop() {
   while (true) {
     const state = yield select()
-    const { speed, level } = state.toObject()
-    yield move({ dRow: 1, dCol: 0, })
-    if (speed > (level + 1) * 0.5) {
+    const { level } = state.toObject()
+    const speed = getSpeedByLevel(level, isFastDropping)
+    yield move(1, 0)
+    if (speed > (level + 2) * 0.5) {
       yield put({
         type: A.UPDATE_SCORE,
         getScore: 1,
@@ -101,12 +101,64 @@ function* dropLoop() {
   }
 }
 
+function* keyDown({ event }) {
+  const state = yield select()
+  const { isPaused } = state.toObject()
+  const key = event.key.toLowerCase()
+  const keyCode = event.keyCode
+  if (!isPaused) {
+    if (key === 'a' || keyCode === 37) {
+      yield put({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
+    } else if (key === 'd' || keyCode === 39) {
+      yield put({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
+    } else if (key === 's' || keyCode === 40) {
+      if (event.preventDefault) {
+        event.preventDefault()
+      }
+      yield put({ type: A.DROP_KEY_DOWN })
+    } else if ((key === 'w' || keyCode === 38) && !rorateKeyDown) {
+      yield put({ type: A.RORATE })
+      rorateKeyDown = true
+    } else if (key === 'z' && !changeRorateDir) {
+      yield put({ type: A.CHANGE_RORATE_DIR })
+      changeRorateDir = true
+    } else if (key === 'c' && !hold) {
+      yield put({ type: A.HOLD_TETROMINO })
+      hold = true
+    } else if (keyCode === 32 && !dropDown) {
+      if (event.preventDefault) {
+        event.preventDefault()
+      }
+      yield put({ type: A.DROP_DIRECTLY })
+      dropDown = true
+    }
+  }
+}
+
+function* keyUp({ event }) {
+  const key = event.key.toLowerCase()
+  const keyCode = event.keyCode
+  if (key === 'a' || key === 'd' || keyCode === 37 || keyCode === 39) {
+    yield put({ type: A.LR_KEY_UP, keyName: key })
+  } else if (key === 's' || keyCode === 40) {
+    yield put({ type: A.DROP_KEY_UP, keyName: key })
+  } else if (key === 'w' || keyCode === 38) {
+    rorateKeyDown = false
+  } else if (keyCode === 32) {
+    dropDown = false
+  } else if (key === 'z') {
+    changeRorateDir = false
+  } else if (key === 'c') {
+    hold = false
+  }
+}
+
 // 通过键盘控制tetromino的移动
-function* move({ dRow, dCol }) {
+function* move(dRow, dCol) {
   // console.log('move-tetromino')
   const state = yield select()
   const { tetrisMap, curTetromino } = state.toObject()
-  const { row, col } = curTetromino.toObject()
+  const { row } = curTetromino.toObject()
   const nextPosition = curTetromino.update('row', v => v + dRow).update('col', v => v + dCol)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   // 如果物块刚出来就发现不能继续移动，Game Over!
@@ -118,12 +170,12 @@ function* move({ dRow, dCol }) {
     if (!canMove && dRow === 1) {
       yield mergeMap()
     } else if (canMove) { // 保证物体在下个位置不会碰到墙壁或与其他物块碰撞
-      yield changeTetromino({ next: nextPosition })
+      yield changeTetromino(nextPosition)
     }
   }
 }
 
-function* changeTetromino({ next }) {
+function* changeTetromino(next) {
   const state = yield select()
   const { tetrisMap, helpSchemaOn } = state.toObject()
   yield put({
@@ -143,7 +195,7 @@ function* dropDirectly() {
   // console.log('drop-directly')
   const state = yield select()
   const { tetrisMap, curTetromino } = state.toObject()
-  yield changeTetromino({ next: forecastPosition(tetrisMap, curTetromino) })
+  yield changeTetromino(forecastPosition(tetrisMap, curTetromino))
   yield put({
     type: A.UPDATE_SCORE,
     getScore: 2 * (19 - curTetromino.get('row')),
@@ -172,6 +224,7 @@ function* mergeMap() {
   })
   yield dropNewOne()
   yield clearLines()
+  yield changeSpeed()
 }
 
 // 与背景板融合后判断是否有行满足消除的要求并更新Map
@@ -195,7 +248,6 @@ function* clearLines() {
       type: A.UPDATE_SCORE,
       getScore: scoreRule.get(result - 1),
     })
-    yield changeSpeed()
   }
 }
 
@@ -203,10 +255,6 @@ function* changeSpeed() {
   const state = yield select()
   const { score, level } = state.toObject()
   if (score >= 1000 + level * (level - 1) * 500) {
-    yield put({
-      type: A.UPDATE_SPEED,
-      speed: (level + 2) * 0.5,
-    })
     yield put({
       type: A.UPDATE_LEVEL,
     })
@@ -218,7 +266,7 @@ function* dropNewOne() {
   // console.log('drop-new-tetromino')
   const state = yield select()
   const { nextTetromino } = state.toObject()
-  yield changeTetromino({ next: nextTetromino })
+  yield changeTetromino(nextTetromino)
   yield put({
     type: A.UPDATE_NEXT_TETROMINO,
     next: dropRandom(),
@@ -233,7 +281,7 @@ function* rorate() {
   const nextPosition = curTetromino.update('direction', v => (v + rorateDir) % 4)
   const canMove = canTetrominoMove(tetrisMap, nextPosition)
   if (canMove && curTetromino.get('type') !== 'O') {
-    yield changeTetromino({ next: nextPosition })
+    yield changeTetromino(nextPosition)
   }
 }
 
@@ -260,7 +308,7 @@ function* handleHold() {
       yield dropNewOne()
     } else {
       const { row, col } = convert(hold)
-      yield changeTetromino({ next: Map({ type: hold, row, col, direction: 0, canBeHold: false }) })
+      yield changeTetromino(Map({ type: hold, row, col, direction: 0, canBeHold: false }))
     }
   }
 }

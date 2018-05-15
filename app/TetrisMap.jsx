@@ -19,12 +19,6 @@ function mapStateToProps(state, ownProps) {
 
 class TetrisMap extends React.Component {
   // 为了长按旋转键时不连续触发旋转事件的变量
-  rorateKeyDown = false
-  dropDirectly = false
-  pauseKeyDown = false
-  changeRorateDir = false
-  hold = false
-
   componentDidMount() {
     // this.props.dispatch({ type: A.CONTINUE })
     document.addEventListener('keydown', this.onKeyDown)
@@ -36,65 +30,23 @@ class TetrisMap extends React.Component {
     document.removeEventListener('keyup', this.onKeyUp)
   }
 
+  pauseKeyDown = false
+
   onKeyUp = (event) => {
-    const key = event.key.toLowerCase()
-    const keyCode = event.keyCode
-    if (key === 'a' || key === 'd' || keyCode === 37 || keyCode === 39) {
-      this.props.dispatch({ type: A.LR_KEY_UP, keyName: key })
-    } else if (key === 's' || keyCode === 40) {
-      this.props.dispatch({ type: A.DROP_KEY_UP, keyName: key })
-    } else if (key === 'w' || keyCode === 38) {
-      this.rorateKeyDown = false
-    } else if (keyCode === 32) {
-      this.dropDirectly = false
-    } else if (keyCode === 27) {
+    if (event.keyCode === 27) {
       this.pauseKeyDown = false
-    } else if (key === 'z') {
-      this.changeRorateDir = false
-    } else if (key === 'c') {
-      this.hold = false
     }
+    this.props.dispatch({ type: A.KEY_UP, event })
+
   }
 
   onKeyDown = (event) => {
-    const { isPaused } = this.props
-    const key = event.key.toLowerCase()
-    const keyCode = event.keyCode
-    if (isPaused && event.keyCode === 27) {
-      this.props.dispatch({ type: A.CONTINUE })
+    const { dispatch, isPaused } = this.props
+    if (event.keyCode === 27 && !this.pauseKeyDown) {
+      isPaused ? dispatch({ type: A.CONTINUE }) : dispatch({ type: A.PAUSE })
       this.pauseKeyDown = true
-      return null
-    }
-    if (!isPaused) {
-      if (key === 'a' || keyCode === 37) {
-        this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: -1 })
-      } else if (key === 'd' || keyCode === 39) {
-        this.props.dispatch({ type: A.LR_KEY_DOWN, dRow: 0, dCol: 1 })
-      } else if (key === 's' || keyCode === 40) {
-        if (event.preventDefault) {
-          event.preventDefault()
-        }
-        this.props.dispatch({ type: A.DROP_KEY_DOWN })
-      } else if ((key === 'w' || keyCode === 38) && !this.rorateKeyDown) {
-        this.props.dispatch({ type: A.RORATE })
-        this.rorateKeyDown = true
-      } else if (key === 'z' && !this.changeRorateDir) {
-        this.props.dispatch({ type: A.CHANGE_RORATE_DIR })
-        this.changeRorateDir = true
-      } else if (key === 'c' && !this.hold) {
-        this.props.dispatch({ type: A.HOLD_TETROMINO })
-        this.hold = true
-      } else if (keyCode === 32 && !this.dropDirectly) {
-        if (event.preventDefault) {
-          event.preventDefault()
-        }
-        this.props.dispatch({ type: A.DROP_DIRECTLY })
-        this.dropDirectly = true
-      } else if (keyCode === 27 && !this.pauseKeyDown) {
-        // todo 长按esc存在问题
-        this.props.dispatch({ type: A.PAUSE })
-        this.pauseKeyDown = true
-      }
+    } else {
+      this.props.dispatch({ type: A.KEY_DOWN, event })
     }
   }
 
@@ -171,7 +123,6 @@ class TetrisMap extends React.Component {
             src="control.png"
             alt="control"
           />
-          {/*<span className="header-content" style={{ marginTop: '300px' }} />*/}
         </div>
         <div
           style={{
@@ -255,8 +206,7 @@ class TetrisMap extends React.Component {
           {isGameOver || isPaused ?
             <div className="pop-wrapper">
               {isGameOver ? <GameOverPage /> : null}
-              {/*{isPaused ? <PausedPage /> : null}*/}
-              {isPaused ? <PausedPage /> : null}
+              {!isGameOver && isPaused ? <PausedPage /> : null}
             </div> : null}
         </div>
       </div>

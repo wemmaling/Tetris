@@ -9,8 +9,6 @@ export const UPDATE_SCORE = 'UPDATE_SCORE'
 export const GAME_OVER = 'GAME_OVER'
 // 旋转物块
 export const RORATE = 'RORATE'
-// 改变下落速度
-export const UPDATE_SPEED = 'UPDATE_SPEED'
 // 长按按键
 export const LR_KEY_UP = 'LR_KEY_UP'
 export const LR_KEY_DOWN = 'LR_KEY_DOWN'
@@ -35,3 +33,6 @@ export const CHANGE_RORATE_DIR = 'CHANGE_RORATE_DIR'
 
 export const HOLD_TETROMINO = 'HOLD_TETROMINO'
 export const UPDATE_HOLD = 'UPDATE_HOLD'
+
+export const KEY_DOWN = 'KEY_DOWN'
+export const KEY_UP = 'KEY_ON'

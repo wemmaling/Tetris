@@ -15,8 +15,6 @@ const initialState = Map({
   score: 0,
   // 关卡
   level: 1,
-  // 下落速度
-  speed: 1,
   // 游戏是否结束
   isGameOver: false,
   isGoing: false,
@@ -39,8 +37,6 @@ export default function updateMap(state = initialState, action) {
     return state.update('score', v => v + getScore)
   } else if (action.type === A.UPDATE_GAME_STATUS) {
     return state.set('isGameOver', true)
-  } else if (action.type === A.UPDATE_SPEED) {
-    return state.set('speed', action.speed)
   } else if (action.type === A.UPDATE_NEXT_TETROMINO) {
     return state.set('nextTetromino', action.next)
   } else if (action.type === A.PAUSE) {
