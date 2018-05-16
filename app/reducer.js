@@ -7,7 +7,9 @@ const initialState = Map({
   tetrisMap: Repeat(Repeat("X", 10).toList(), 20).toList(),
   // 正在下落的tetromino类型以及当前坐标
   curTetromino: dropRandom(),
+  // 下一掉落物块
   nextTetromino: dropRandom(),
+  // 当前下落物块的掉落预览
   forecast: null,
   // 临时存储块
   hold: null,
@@ -17,11 +19,13 @@ const initialState = Map({
   level: 1,
   // 游戏是否结束
   isGameOver: false,
+  // 涉及开始页的显示
   isGoing: false,
   // 游戏是否暂停
   isPaused: false,
   // 帮助模式
   helpSchemaOn: false,
+  // 旋转方向，1为顺时针，-1为逆时针
   rorateDir: -1,
 })
 

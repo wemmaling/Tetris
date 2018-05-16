@@ -31,7 +31,7 @@ const keysArray = colorMap.keySeq().toList().delete(0).toArray()
 export function dropRandom() {
   const index = Math.floor(Math.random() * 7)
   const type = keysArray[index]
-  const {row, col} = convert(type)
+  const { row, col } = convert(type)
 
   return Map({ type, row, col, direction: 0, canBeHold: true })
 }
@@ -78,4 +78,8 @@ export function getSpeedByLevel(level, isFastDropping = false) {
   } else {
     return (level + 1) * 0.5
   }
+}
+
+export function shouldUpdateLevel(score, level) {
+  return score >= 1000 + level * (level - 1) * 500
 }

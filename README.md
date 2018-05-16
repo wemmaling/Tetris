@@ -1,65 +1,98 @@
-# Tetris开发心路历程
-## 简介
-
-**俄罗斯方块**是对90后来讲非常有情怀的一种益智游戏。
-
-**操作简介**：
-  - W——控制物块的旋转变化
-  - A、D——控制物块的左右移动
-  - S——控制物块的加速下落
-  - 空格——控制物块直接下落到底
-
-状态：开发中
-
 **[点击这里试玩游戏](https://wemmaling.github.io/Tetris/)**
 
-## 使用技术
+# 操作设置
 
-1. **React**构建视图层
-2. **redux-saga**管理业务逻辑
+- W/ArrowUp: 旋转
+- A/ArrowLeft: 左移
+- D/ArrowRight: 右移
+- S/ArrowDown: 加速下落
+- ESC/鼠标点击"暂停"或"继续"按钮: 暂停/继续
+- Z: 改变当前旋转方向
+- C: 存储当前Tetromino并释放hold中存储的Tetromino(若hold中无存储，则掉落新的Tetromino)
+- 鼠标点击"简易模式"/"正常模式": 显示/关闭当前Tetromino的掉落预览
+- 鼠标点击"重新开始": 重新开始新的游戏
+# 得分规则
+- 一次性消除1行: 100
+- 一次性消除2行: 300
+- 一次性消除3行: 500
+- 一次性消除4行: 800
+- 长按下键加速下落: 1 * 距离
+- 直接下落到底部: 2 * 距离
+# 关卡设置
+当`score >= 1000 + level * (level - 1) * 500`时自动进入下一关卡，速度增加为`(level + 1) * 0.5`
+# redux-saga游戏逻辑
+1. `rootSaga`: 默认启动的saga。在该saga中`fork(watchGameStatus)`来监听游戏的状态以及游戏逻辑的Actions。
 
-## 预想难点
+2. `​watchGameStatus`: 设置游戏逻辑并监听游戏进行中发出的Actions。使用redux-saga提供的take API阻塞监听一些Actions的发出。如`take([A.CONTINUE, A.RESTART])`，等待数组中的Actions被dispatch后，再继续之后的游戏逻辑。
+    - `dropLooop`:
+    - `dropKeyUpAndDown`:
+    - `lrKeyUpAndDown`:
+```javascript
+function* watchGameStatus() {
+  while (true) {
+    yield take([A.CONTINUE, A.RESTART]) // 阻塞监听"游戏继续"和"游戏重新开始"Actions
+    yield takeEvery(A.GAME_OVER, gameOver)
+    yield race([
+      // 监听游戏中一些Actions(RORATE/DROP_DIRECTLY/HOLD_TETROMINO/KEY_DOWN/KEY_ON)的dispatch，并执行对应saga函数
+      gameActions(),
+      // 物块自动下落
+      call(dropLoop),
+      // 监听下键的按下与释放
+      call(dropKeyUpAndDown),
+      // 监听左右按键的按下与释放
+      call(lrKeyUpAndDown),
+      // 阻塞监听"游戏暂停"和"游戏结束"
+      take([A.PAUSE, A.UPDATE_GAME_STATUS]),
+    ])
+  }
+}
+```
+3. `keyDown/keyUp`: 处理按键时的游戏逻辑
 
-1. 物块的碰撞（包括与墙的碰撞以及与其他物块的碰撞）：
-   - 与其他物块的碰撞：通过判断物块将要到达的位置，静态地图中该位置是否已经存在物块
-   - 与墙壁的碰撞：判断物块**最边缘**的坐标是否超过绘制背景时的边缘行和列
-2. 物块的旋转
-3. 落下物块的随机生成器
-    - 随机函数，方向随机 + 形状随机
-4. 游戏得分逻辑
-    - 一次性消1行100分，2行200分，3行400分，4行800分
-5. 消除原生js监听按键时的突变性
-    - 使用redux-saga解决，相关APItake，cancel，delay等
+4. `move`: Tetromino的移动，接收参数为行列的变化量`(dRow, dCol)`，并判断该移动行为是否能够进行，如发生碰撞不能进行，考虑是以下三种情况的哪一种: (1)游戏结束 （2）向下无法移动且游戏未结束，此时需要合并移动物块和静态背景 (3) 向左右无法移动，此时更新移动物块的位置即可
 
-## 数据结构设计
+5. `mergeMapAndDrop`: 合并移动物块和静态背景，对state中的`tetrisMap`进行更新并掉落新的Tetromino，在这过程中判断是否满足消除要求。在游戏逻辑中，在两种情况下需要调用`mergeMapAndDrop`函数: (1) 无法继续下落的情况 (2) 键盘操控直接下落到底部。
 
-1. 地图和Tetromino怎样存储
-    - 将静态背景和移动中的物块分开存储，静态背景存为一个二维数组，动态物块存储物块的类型和坐标（以物块左上角小方块的坐标为参照坐标，根据delta中存储的相对dRow和dCol可以绘制物块）
-2. 跟Tetromino旋转相关的数据结构怎样设计
-     - 使用一个四维数组存储，以旋转中心点为原点，记录每个物块相对于原点的位置
-     - 在程序运行前，利用旋转函数计算每个图形的旋转数据并存入数组，方便旋转时直接访问
-3. 当前下落的物块需记录哪些信息
-     - 首先，要记录类型，便于绘制图形
-     - 其次，记录物块原点在地图中的行列位置
-     - 另外，要记录当前物块的旋转方向
+6. `clearLines`: 当`tetrisMap`中某一行都变成了非'X'(空白)元素，则消除该行并计算得分。
 
-## redux-saga对状态修改时的处理
+7. `dropNewOne`: 将next预览中的Tetromino赋值给`curTetromino`，并随机生成新的next预览
 
-1. 物块的下落：
-   - 自动下落：使用redux-saga提供的delay函数，fork一个generator函数，每隔一段时间dispatch一个下落的Action
-   - 控制移动：传入移动的dRow，dCol，计算出tetromino的下一个位置，通过函数canMove判断能否移动到该位置（下一位置是墙壁或者有物块存在均不能移动），如果物块当前的动作是下落，且不能移动，则dispatch action将物块和背景地图进行合并
-2. 收到合并的action时，合并当前TetrisMap和物块：
-   - 重新掉落Tetromino：在更新地图之前，将state中的curTetromino重置
-   - 更新静态地图：根据当前物块的type和坐标update TetrisMap
-3. 物块的旋转逻辑:
-   - （最开始计算一次，后续直接访问常量）每个物块的初始定义方向，设置一个通用函数顺时针改变方向
-   - 在state中的curTetromino中增加方向属性
-   - 旋转后更新curTetromino中的方向属性值，更新物块
-4. 长按左右下键时的事件捕获和事件处理
-    - （加速下降）使用take阻塞等待相应（action）按键按下后，更新速度，完成自动下落加速，再等待案件释放的action，监听到按键释放时，恢复速度
-    - （加速左右移动）大致流程同上，不同在于等到按键按下时，向左移动或向右移动的速度通过delay()控制加速，按键释放时，取消加速过程
-5. 物块的直接下落
-    - 通过当前的物块位置，计算垂直向下物块能移动到的最终位置，直接更新curTetromino并合并动态物块和静态背景
+8. `rorate`: 控制Tetromino的旋转。在旋转前，已经根据物块旋转的原点生成各类型物块的旋转数组。
 
+9. `gameOver`:监听游戏结束的Action(`GAME_OVER`)的发出，当捕获到对应Action时，调用`gameOver`函数执行游戏结束的逻辑。更新游戏状态`isGameOver`，判断分数是否超过localStorage存储的最高分，若超过，则更新。
 
+10. `handleHold`: 存储当前物块并取出hold中保存的物块。注意，每个物块只可以被存储一次，在`curTetromino`中使用`canBeHold`标记，如果当前hold中没有存储物块，则直接掉落新的物块。
 
+11. `changeCurTetromino`: 更新当前物块`curTetromino`与其预览`forecast`
+
+12. `dropDirectly`: 将当前Tetromino直接合并到预览下落位置上。其中预览下落位置通过`curTetromino`和`tetrisMap`计算得到
+
+# Redux中state存储数据
+```javascript
+const initialState = Map({
+  // 当前存储的背景数据结构
+  tetrisMap: Repeat(Repeat("X", 10).toList(), 20).toList(),
+  // 正在下落的tetromino类型以及当前坐标
+  curTetromino: dropRandom(),
+  // 下一掉落物块
+  nextTetromino: dropRandom(),
+  // 当前下落物块的掉落预览
+  forecast: null,
+  // 临时存储块
+  hold: null,
+  // 计算得分
+  score: 0,
+  // 关卡
+  level: 1,
+  // 游戏是否结束
+  isGameOver: false,
+  // 涉及开始页的显示
+  isGoing: false,
+  // 游戏是否暂停
+  isPaused: false,
+  // 帮助模式
+  helpSchemaOn: false,
+  // 旋转方向，1为顺时针，-1为逆时针
+  rorateDir: -1,
+})
+```
