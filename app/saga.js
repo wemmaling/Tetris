@@ -28,10 +28,6 @@ let changeRorateDir = false
 let hold = false
 
 export default function* rootSaga() {
-  yield fork(watchGameStatus)
-}
-
-function* watchGameStatus() {
   while (true) {
     yield take([A.CONTINUE, A.RESTART]) // 阻塞监听“游戏继续”和“游戏重新开始”Actions
     yield takeEvery(A.GAME_OVER, gameOver)
@@ -103,6 +99,7 @@ function* dropLoop() {
         type: A.UPDATE_SCORE,
         getScore: 1,
       })
+      yield updateLevelJudge()
     }
     yield delay(1000 / speed)
   }
@@ -212,6 +209,7 @@ function* dropDirectly() {
     type: A.UPDATE_SCORE,
     getScore: 2 * (19 - curTetromino.get('row')),
   })
+  yield updateLevelJudge()
   yield mergeMapAndDrop()
 }
 
@@ -236,13 +234,6 @@ function* mergeMapAndDrop() {
   })
   yield dropNewOne()
   yield clearLines()
-  const newState = yield select()
-  const { score, level } = newState.toObject()
-  if (shouldUpdateLevel(score, level)) {
-    yield put({
-      type: A.UPDATE_LEVEL,
-    })
-  }
 }
 
 // 与背景板融合后判断是否有行满足消除的要求并更新Map
@@ -265,6 +256,17 @@ function* clearLines() {
     yield put({
       type: A.UPDATE_SCORE,
       getScore: scoreRule.get(result - 1),
+    })
+    yield updateLevelJudge()
+  }
+}
+
+function* updateLevelJudge () {
+  const newState = yield select()
+  const { score, level } = newState.toObject()
+  if (shouldUpdateLevel(score, level)) {
+    yield put({
+      type: A.UPDATE_LEVEL,
     })
   }
 }
