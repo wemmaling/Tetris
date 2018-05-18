@@ -21,30 +21,51 @@
 # 关卡设置
 当`score >= 1000 + level * (level - 1) * 500`时自动进入下一关卡，速度增加为`(level + 1) * 0.5`
 # redux-saga游戏逻辑
-1. `rootSaga`: 默认启动的saga。来监听游戏的状态以及游戏逻辑的Actions。设置游戏逻辑并监听游戏进行中发出的Actions。使用redux-saga提供的take API阻塞监听一些Actions的发出。如`take([A.CONTINUE, A.RESTART])`，等待数组中的Actions被dispatch后，再继续之后的游戏逻辑。
-    - `dropLooop`:
-    - `dropKeyUpAndDown`:
-    - `lrKeyUpAndDown`:
+1. `rootSaga`: 默认启动的saga。
+
+<div align="center"><img src="./app/static/rootSaga.png"/></div>
+
+监听游戏的状态以及游戏逻辑的Actions。设置游戏逻辑并监听游戏进行中发出的Actions。使用redux-saga提供的take API阻塞监听一些Actions的发出。如`take([A.CONTINUE, A.RESTART])`，等待数组中的Actions被dispatch后，再继续之后的游戏逻辑。
+
+- `moveLoop`: Tetromino的自动移动
+
+<div align="center"><img src="./app/static/moveLoop.png"/></div>
+
+- `dropKeyUpAndDown`: 监听下落键的按下与释放
+
+<div align="center"><img src="./app/static/dropKeyUpAndDown.png"/></div>
+
+- `lrKeyUpAndDown`: 监听左右键的按下与释放
+
+<div align="center"><img src="./app/static/lrKeyUpAndDown.png"/></div>
+
+- `gameActions`: 监听游戏中部分游戏逻辑Actions的dispatch
+
+<div align="center"><img src="./app/static/gameActions.png"/></div>
+
+
 ```javascript
-function* watchGameStatus() {
+function* rootSaga() {
   while (true) {
-    yield take([A.CONTINUE, A.RESTART]) // 阻塞监听"游戏继续"和"游戏重新开始"Actions
+    yield take([A.CONTINUE, A.RESTART]) // 阻塞监听“游戏继续”和“游戏重新开始”Actions
     yield takeEvery(A.GAME_OVER, gameOver)
     yield race([
       // 监听游戏中一些Actions(RORATE/DROP_DIRECTLY/HOLD_TETROMINO/KEY_DOWN/KEY_ON)的dispatch，并执行对应saga函数
       gameActions(),
       // 物块自动下落
-      call(dropLoop),
+      call(moveLoop, 1, 0),
       // 监听下键的按下与释放
       call(dropKeyUpAndDown),
       // 监听左右按键的按下与释放
       call(lrKeyUpAndDown),
-      // 阻塞监听"游戏暂停"和"游戏结束"
+      // 阻塞监听“游戏暂停”和“游戏结束”
       take([A.PAUSE, A.UPDATE_GAME_STATUS]),
     ])
   }
 }
 ```
+
+
 2. `keyDown/keyUp`: 处理按键按下/松开时的游戏逻辑
 
 3. `move`: Tetromino的移动，接收参数为行列的变化量`(dRow, dCol)`，并判断该移动行为是否能够进行，如发生碰撞不能进行，考虑是以下三种情况的哪一种: (1)游戏结束 （2）向下无法移动且游戏未结束，此时需要合并移动物块和静态背景 (3) 向左右无法移动，此时更新移动物块的位置即可

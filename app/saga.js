@@ -35,7 +35,7 @@ export default function* rootSaga() {
       // 监听游戏中一些Actions(RORATE/DROP_DIRECTLY/HOLD_TETROMINO/KEY_DOWN/KEY_ON)的dispatch，并执行对应saga函数
       gameActions(),
       // 物块自动下落
-      call(dropLoop),
+      call(moveLoop, 1, 0),
       // 监听下键的按下与释放
       call(dropKeyUpAndDown),
       // 监听左右按键的按下与释放
@@ -60,7 +60,7 @@ function* dropKeyUpAndDown() {
     yield take(A.DROP_KEY_DOWN)
     isFastDropping = true
     yield race([
-      call(dropLoop),
+      call(moveLoop, 1, 0),
       take([A.DROP_KEY_UP, A.UPDATE_GAME_STATUS]),
     ])
     isFastDropping = false
@@ -73,35 +73,31 @@ function* lrKeyUpAndDown() {
     const action = yield take(A.LR_KEY_DOWN)
     const { dRow, dCol } = action
     yield race([
-      call(moveLeftOrRight, dRow, dCol),
+      call(moveLoop, dRow, dCol),
       take([A.LR_KEY_UP, A.UPDATE_GAME_STATUS]),
     ])
   }
 }
 
-// 加速左右移动
-function* moveLeftOrRight(dRow, dCol) {
-  while (true) {
-    yield move(dRow, dCol)
-    yield delay(130)
-  }
-}
-
 // tetromino的自动下落
-function* dropLoop() {
+function* moveLoop(dRow, dCol) {
   while (true) {
     const state = yield select()
     const { level } = state.toObject()
     const speed = getSpeedByLevel(level, isFastDropping)
-    yield move(1, 0)
-    if (speed > (level + 1) * 0.5) {
-      yield put({
-        type: A.UPDATE_SCORE,
-        getScore: 1,
-      })
-      yield updateLevelJudge()
+    yield move(dRow, dCol)
+    if (dRow === 1) {
+      if (speed > (level + 1) * 0.5) {
+        yield put({
+          type: A.UPDATE_SCORE,
+          getScore: 1,
+        })
+        yield updateLevelJudge()
+      }
+      yield delay(1000 / speed)
+    } else {
+      yield delay(130)
     }
-    yield delay(1000 / speed)
   }
 }
 
@@ -188,7 +184,7 @@ function* move(dRow, dCol) {
 
 function* changeCurTetromino(next) {
   const state = yield select()
-  const { tetrisMap} = state.toObject()
+  const { tetrisMap } = state.toObject()
   yield put({
     type: A.UPDATE_TETROMINO,
     next,
@@ -261,7 +257,7 @@ function* clearLines() {
   }
 }
 
-function* updateLevelJudge () {
+function* updateLevelJudge() {
   const newState = yield select()
   const { score, level } = newState.toObject()
   if (shouldUpdateLevel(score, level)) {
